@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ku" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#030407">
+    <title>داواکردنی مۆڵەت - سیستەمی مۆڵەت</title>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="request.css">
+</head>
+<body>
+
+    <div class="stars" id="stars"></div>
+
+    <button class="menu-toggle" onclick="toggleSidebar()" aria-label="مێنیۆ">☰</button>
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <div class="layout">
+
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">🌙 سیستەمی مۆڵەت</div>
+            <a href="../dashboard/dashboard.html" class="nav-item"><span class="icon">🏠</span> پەڕەی سەرەکی</a>
+            <a href="../request-leave/request.html" class="nav-item active"><span class="icon">📄</span> داواکردنی مۆڵەت</a>
+            <a href="../response-leave/response.html" class="nav-item"><span class="icon">✅</span> وەڵامدانەوەی مۆڵەت</a>
+            <a href="../reports/reports.html" class="nav-item"><span class="icon">📊</span> ڕاپۆرتەکان</a>
+            <a href="../add-employee/employee.html" class="nav-item"><span class="icon">👤</span> زیادکردنی کارمەند</a>
+            <a href="../permissions/permissions.html" class="nav-item"><span class="icon">🔒</span> دەسەڵاتەکانی کارمەند</a>
+        </aside>
+
+        <main class="main-content">
+            <div class="container">
+
+                <div class="top-header">
+                    <div>
+                        <h1>داواکردنی مۆڵەت و پسوولە</h1>
+                        <p>لێرەدا دەتوانیت داواکاری مۆڵەت بۆ کارمەندەکان تۆمار بکەیت.</p>
+                    </div>
+                    <div style="font-size: 28px;">📄</div>
+                </div>
+
+                <div class="form-card">
+                    <div class="form-title">📝 فرمی داواکردنی مۆڵەت</div>
+                    
+                    <form onsubmit="preparePreview(event)">
+                        <div class="form-grid">
+                            <div class="form-group full-width">
+                                <label>هەڵبژاردنی کارمەند</label>
+                                <select id="selectEmployee" onchange="fillEmployeeData()" required>
+                                    <option value="">-- کارمەند هەڵبژێرە --</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>ناوی کارمەند (ئۆتۆماتیکی)</label>
+                                <input type="text" id="empNameAuto" placeholder="ناو..." readonly style="background: #050811; color: #94a3b8;">
+                            </div>
+
+                            <div class="form-group">
+                                <label>ژمارەی مۆبایل (ئۆتۆماتیکی)</label>
+                                <input type="text" id="empPhoneAuto" placeholder="مۆبایل..." readonly style="background: #050811; color: #94a3b8;">
+                            </div>
+
+                            <div class="form-group">
+                                <label>جۆری مۆڵەت</label>
+                                <select id="leaveType" onchange="toggleLeaveMode()">
+                                    <option value="ڕۆژانە">ڕۆژانە</option>
+                                    <option value="کاتژمێری">کاتژمێری</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>مۆڵەتەکە چ جۆرە؟ (هۆکار)</label>
+                                <select id="leaveCategory">
+                                    <option value="">-- هۆکار هەڵبژێرە --</option>
+                                </select>
+                            </div>
+
+                            <!-- بەشی ڕۆژانە -->
+                            <div class="form-group" id="daysGroup">
+                                <label>چەند ڕۆژ مۆڵەتت دەوێت؟ (بە ژمارە)</label>
+                                <input type="number" id="leaveDays" min="1" value="1" oninput="calculateDates()">
+                            </div>
+
+                            <!-- بەشی کاتژمێری -->
+                            <div class="form-group full-width" id="timeRangeGroup" style="display: none;">
+                                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
+                                    <div class="form-group" style="margin-bottom: 0;">
+                                        <label>لە کاتژمێر:</label>
+                                        <input type="time" id="startTime" onchange="calculateTimeDifference()">
+                                    </div>
+                                    <div class="form-group" style="margin-bottom: 0;">
+                                        <label>تاوەکو کاتژمێر:</label>
+                                        <input type="time" id="endTime" onchange="calculateTimeDifference()">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>لە ڕێکەوتی</label>
+                                <input type="date" id="leaveStartDate" onchange="calculateDates()" required>
+                            </div>
+
+                            <div class="form-group full-width">
+                                <label>ماوەی مۆڵەت (ئۆتۆماتیکی)</label>
+                                <input type="text" id="autoDateRange" placeholder="لە ڕێکەوتی ..." readonly style="background: #050811; color: #00f3ff; font-weight: bold;">
+                            </div>
+
+                            <div class="form-group full-width">
+                                <div id="timeErrorAlert" class="alert-box"></div>
+                            </div>
+
+                            <div class="form-group full-width">
+                                <label>تێبینی / هۆکاری تێر و تەسەل</label>
+                                <textarea id="leaveNote" placeholder="بۆچی مۆڵەتت دەوێت؟..."></textarea>
+                            </div>
+                        </div>
+
+                        <div class="actions-row">
+                            <button type="submit" id="submitBtn" class="submit-btn">📋 تۆمارکردن و پێشبینین</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- مۆدێلی پێشبینین -->
+    <div class="modal" id="previewModal">
+        <div class="modal-content">
+            <div id="previewReceiptContent"></div>
+            <div class="preview-actions">
+                <button type="button" class="btn-confirm" onclick="confirmSubmit()">✅ ناردن و پەسەندکردن</button>
+                <button type="button" class="btn-back" onclick="cancelPreview()">🔙 گەڕانەوە بۆ چاککردن</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="request.js"></script>
+</body>
+</html>

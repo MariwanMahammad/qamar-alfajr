@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="ku" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#030407">
+    <title>ڕاپۆرتی هاتن و چوون - Roya</title>
+    <!-- شێوازی گشتی (سایدبار، کارت، دوگمە، مۆداڵ...) لە employee.css دێت -->
+    <link rel="stylesheet" href="../add-employee/employee.css">
+    <style>
+        .main-content { padding: 25px clamp(15px, 2.5vw, 40px); }
+        .container { max-width: none; width: 100%; }
+        .toolbar { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+        .hint { font-size: 12px; color: #94a3b8; line-height: 1.8; margin-top: 8px; }
+        .sub-title { font-size: 14px; font-weight: bold; color: #00f3ff; margin: 22px 0 10px; padding-top: 14px; border-top: 1px dashed rgba(0, 243, 255, .2); }
+        .tw { overflow-x: auto; border: 1px solid rgba(0, 243, 255, 0.12); border-radius: 12px; }
+
+        /* خشتەی کاتی کار: ٤ هەفتە × ٧ ڕۆژ */
+        .sg { width: 100%; border-collapse: collapse; min-width: 1000px; font-size: 12px; }
+        .sg th { background: #050811; color: #00f3ff; padding: 10px 6px; text-align: center; white-space: nowrap; border-bottom: 2px solid #1e293b; }
+        .sg td { padding: 8px 6px; text-align: center; border-bottom: 1px solid #1e293b; vertical-align: top; }
+        .sg td.on { background: rgba(16, 185, 129, .07); } .sg td.offc { background: rgba(148, 163, 184, .08); color: #64748b; }
+        .sg td em { display: block; margin-top: 8px; font-style: normal; font-size: 12px; }
+        .sg input[type=time] { display: block; width: 100%; margin-top: 5px; }
+        .cb { display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 12px; cursor: pointer; margin: 0; color: #cbd5e1; }
+        .cb input { width: 16px; height: 16px; accent-color: #00f3ff; }
+        input[type=time] { background: #030407; border: 1px solid #1e293b; border-radius: 8px; color: #fff; padding: 6px 8px; font-family: inherit; font-size: 12.5px; color-scheme: dark; direction: ltr; }
+        input[type=time]:focus { border-color: #00f3ff; outline: none; }
+        .grp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; }
+        .grp { display: flex; align-items: center; justify-content: space-between; gap: 10px; background: #030407; border: 1px solid #1e293b; border-radius: 10px; padding: 8px 12px; font-size: 13px; }
+        .grp select { background: #0b0f19; color: #fff; border: 1px solid #1e293b; border-radius: 8px; padding: 6px 8px; font-family: inherit; }
+
+        .sum-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 14px; margin-bottom: 25px; }
+        .sum { background: rgba(11, 15, 25, 0.95); border: 1px solid rgba(0, 243, 255, 0.25); border-radius: 16px; padding: 14px 16px; text-align: center; }
+        .sum .sl { font-size: 12.5px; color: #94a3b8; }
+        .sum .sv { font-size: 20px; font-weight: bold; margin-top: 6px; direction: ltr; color: #00f3ff; }
+        .sum .sm { font-size: 11px; color: #94a3b8; margin-top: 2px; }
+        .sum.s-in { border-color: rgba(16, 185, 129, .55); background: rgba(16, 185, 129, .08); } .sum.s-in .sv { color: #34d399; }
+        .sum.s-out { border-color: rgba(239, 68, 68, .55); background: rgba(239, 68, 68, .08); } .sum.s-out .sv { color: #f87171; }
+        .sum.s-leave { border-color: rgba(56, 189, 248, .55); background: rgba(56, 189, 248, .08); } .sum.s-leave .sv { color: #38bdf8; font-size: 16px; }
+        .sum.s-rest { border-color: rgba(148, 163, 184, .55); background: rgba(148, 163, 184, .08); } .sum.s-rest .sv { color: #cbd5e1; }
+        .sum.s-late { border-color: rgba(251, 191, 36, .55); background: rgba(251, 191, 36, .08); } .sum.s-late .sv { color: #fbbf24; font-size: 16px; }
+        .sum.s-early { border-color: rgba(251, 146, 60, .55); background: rgba(251, 146, 60, .08); } .sum.s-early .sv { color: #fb923c; font-size: 16px; }
+        .sum.s-over { border-color: rgba(45, 212, 191, .55); background: rgba(45, 212, 191, .08); } .sum.s-over .sv { color: #2dd4bf; font-size: 16px; }
+        .sum.s-work { border-color: rgba(167, 139, 250, .55); background: rgba(167, 139, 250, .08); } .sum.s-work .sv { color: #a78bfa; font-size: 16px; }
+        .sum.s-pay { border-color: rgba(251, 191, 36, .7); background: rgba(251, 191, 36, .10); } .sum.s-pay .sv { color: #fbbf24; font-size: 22px; }
+        .pay-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin-top: 16px; }
+
+        .data-table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 1300px; }
+        .data-table th { background: #050811; color: #00f3ff; padding: 12px 8px; text-align: center; font-size: 12px; white-space: nowrap; border-bottom: 2px solid #1e293b; }
+        .data-table td { padding: 8px; text-align: center; color: #cbd5e1; border-bottom: 1px solid #1e293b; vertical-align: middle; }
+        .data-table tr.off td { background: rgba(148, 163, 184, 0.07); color: #64748b; }
+        .data-table tr.upcoming td { opacity: .55; }
+        .data-table .dt { direction: ltr; white-space: nowrap; }
+        .st { display: inline-block; padding: 3px 12px; border-radius: 14px; font-size: 11.5px; font-weight: bold; }
+        .st.present { background: rgba(16, 185, 129, .16); color: #34d399; } .st.absent { background: rgba(239, 68, 68, .16); color: #f87171; }
+        .st.leave { background: rgba(56, 189, 248, .16); color: #38bdf8; } .st.off { background: rgba(148, 163, 184, .16); color: #94a3b8; }
+        .st.upcoming { background: rgba(167, 139, 250, .14); color: #a78bfa; } .st.restwork { background: rgba(251, 146, 60, .18); color: #fb923c; }
+        .over { color: #2dd4bf; font-weight: bold; }
+        .late { color: #fbbf24; font-weight: bold; } .early { color: #fb923c; font-weight: bold; } .work { color: #a78bfa; font-weight: bold; }
+        .empty { padding: 30px; color: #64748b; }
+        .map-row { display: grid; grid-template-columns: 1fr 140px; gap: 10px; align-items: center; padding: 6px 0; border-bottom: 1px dashed rgba(148, 163, 184, .2); font-size: 13px; }
+        .map-row input { background: #030407; border: 1px solid #1e293b; border-radius: 8px; color: #fff; padding: 7px 10px; font-family: inherit; direction: ltr; }
+
+        html[data-theme=light] .hint, html[data-theme=light] .cb, html[data-theme=light] .sum .sl, html[data-theme=light] .sum .sm { color: #475569; }
+        html[data-theme=light] .sub-title { color: #0369a1; }
+        html[data-theme=light] input[type=time], html[data-theme=light] .grp select, html[data-theme=light] .map-row input { background: #f8fafc; color: #0f172a; border-color: #cbd5e1; color-scheme: light; }
+        html[data-theme=light] .grp { background: #f8fafc; border-color: #cbd5e1; }
+        html[data-theme=light] .sg th { background: #e2e8f0; color: #0369a1; } html[data-theme=light] .sg td.on { background: #ecfdf5; } html[data-theme=light] .sg td.offc { background: #f1f5f9; }
+        html[data-theme=light] .sum.s-in .sv { color: #047857 !important; } html[data-theme=light] .sum.s-out .sv { color: #b91c1c !important; }
+        html[data-theme=light] .sum.s-leave .sv { color: #0369a1 !important; } html[data-theme=light] .sum.s-late .sv, html[data-theme=light] .sum.s-pay .sv { color: #b45309 !important; }
+        html[data-theme=light] .sum.s-work .sv { color: #6d28d9 !important; } html[data-theme=light] .sum.s-rest .sv { color: #475569 !important; }
+        html[data-theme=light] .data-table tr.off td { background: #f1f5f9; color: #64748b; }
+        html[data-theme=light] .st.present { color: #047857; } html[data-theme=light] .st.absent { color: #b91c1c; } html[data-theme=light] .st.leave { color: #0369a1; }
+        html[data-theme=light] .st.upcoming { color: #6d28d9; } html[data-theme=light] .st.restwork { color: #c2410c; }
+        html[data-theme=light] .sum.s-early .sv { color: #c2410c !important; } html[data-theme=light] .sum.s-over .sv, html[data-theme=light] .over { color: #0f766e !important; }
+        html[data-theme=light] .late { color: #b45309; } html[data-theme=light] .early { color: #c2410c; } html[data-theme=light] .work { color: #6d28d9; }
+
+        .print-head { display: none; }
+        .pv { display: none; }
+        /* ماوەی پشوو لە ناو خانەکانی خشتە */
+        .brk { display: flex; align-items: center; justify-content: center; gap: 3px; margin-top: 6px; direction: ltr; }
+        .brk input { width: 46px; padding: 5px 4px; background: #030407; border: 1px solid #1e293b; border-radius: 8px; color: #fff; font-family: inherit; font-size: 12.5px; text-align: center; }
+        .brk input:focus { border-color: #00f3ff; outline: none; }
+        .brk span { font-size: 13px; }
+        .dur { display: flex; align-items: center; gap: 6px; direction: ltr; }
+        .dur input { width: 80px; text-align: center; }
+        .dur1 { width: 64px !important; text-align: center; direction: ltr; }
+        .wdel { margin-top: 8px; background: none; border: 1px solid rgba(239, 68, 68, .4); color: #fca5a5; border-radius: 8px; padding: 3px 8px; font-family: inherit; font-size: 11px; cursor: pointer; }
+        .wdel:hover { background: rgba(239, 68, 68, .15); }
+        .dots { background: #1e293b; color: #00f3ff; border: 1px solid rgba(0, 243, 255, .3); border-radius: 6px; padding: 3px 10px; font-size: 18px; font-weight: bold; cursor: pointer; line-height: 1.1; }
+        .dots:hover { background: #00f3ff; color: #000; }
+        .dm { display: none; position: fixed; z-index: 9999; min-width: 180px; background: #0b0f19; border: 1px solid #00f3ff; border-radius: 10px; overflow: hidden; box-shadow: 0 8px 25px rgba(0, 0, 0, .7); }
+        .dm.show { display: block; }
+        .dm button { display: block; width: 100%; padding: 10px 14px; background: transparent; border: 0; border-bottom: 1px solid #1e293b; color: #fff; font-family: inherit; font-size: 13px; cursor: pointer; text-align: start; }
+        .dm button:last-child { border-bottom: 0; } .dm button:hover { background: #1e293b; color: #00f3ff; }
+        .st.hourly { background: rgba(56, 189, 248, .16); color: #38bdf8; }
+        html[data-theme=light] .dots { background: #e0f2fe; color: #0369a1; border-color: #bae6fd; }
+        html[data-theme=light] .dm { background: #fff; border-color: #0ea5e9; } html[data-theme=light] .dm button { color: #0f172a; border-color: #e2e8f0; } html[data-theme=light] .dm button:hover { background: #e0f2fe; color: #0369a1; }
+        html[data-theme=light] .st.hourly { color: #0369a1; }
+        /* سویچی خڕ: بازنەکە لەناو شوێنەکەی دەخلیسکێت؛ کاتێک چالاک بێت سەوز دەبێت */
+        .tgl, .input-group label.tgl { display: flex; align-items: center; gap: 12px; cursor: pointer; margin: 0 0 12px; font-size: 13.5px; color: #cbd5e1; }
+        .tgl input { position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none; }
+        .tgl .tgl-track { display: block !important; position: relative !important; flex: none; box-sizing: border-box !important; width: 52px !important; height: 28px !important; min-width: 52px; border-radius: 28px; background: #475569; border: 2px solid #64748b; direction: ltr; transition: background .2s, border-color .2s; }
+        .tgl .tgl-knob { display: block !important; position: absolute !important; top: 2px; left: 2px; width: 20px !important; height: 20px !important; border-radius: 50%; background: #fff; box-shadow: 0 1px 4px rgba(0, 0, 0, .45); transition: left .2s; }
+        .tgl input:checked + .tgl-track { background: #22c55e; border-color: #16a34a; }
+        .tgl input:checked + .tgl-track .tgl-knob { left: 26px; }
+        .tgl input:focus-visible + .tgl-track { outline: 2px solid #00f3ff; outline-offset: 2px; }
+        html[data-theme=light] .tgl { color: #334155; }
+        html[data-theme=light] .tgl .tgl-track { background: #cbd5e1; border-color: #94a3b8; }
+        html[data-theme=light] .tgl input:checked + .tgl-track { background: #22c55e; border-color: #16a34a; }
+        .st.extra { background: rgba(45, 212, 191, .16); color: #2dd4bf; }
+        .exr { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 12.5px; padding: 8px 0; border-bottom: 1px dashed rgba(148, 163, 184, .25); }
+        .exr button { background: none; border: 0; color: #fca5a5; cursor: pointer; }
+        html[data-theme=light] .brk input { background: #f8fafc; color: #0f172a; border-color: #cbd5e1; }
+        html[data-theme=light] .st.extra { color: #0f766e; }
+
+        /* ===== پرینت: A4 بە باری پانی ===== */
+        @page { size: A4 landscape; margin: 8mm; @bottom-center { content: counter(page) " / " counter(pages); font-size: 9px; color: #555; direction: ltr; unicode-bidi: bidi-override; } }
+        @media print {
+            html, body, :root[data-theme] body, :root[data-theme] { background: #fff !important; color: #000 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }   /* ڕەنگی ڕووناکیش پشتەوەی سپی بێت */
+            .stars, .sidebar, .menu-toggle, .sidebar-overlay, .no-print, .sb-alert, #sbErrors, .modal-overlay, .dm, .page-header, .message { display: none !important; }
+            .layout { display: block !important; }
+            .main-content { margin: 0 !important; padding: 0 !important; width: 100% !important; max-width: none !important; }
+            .container { max-width: none !important; width: 100% !important; padding: 0 !important; margin: 0 !important; }
+            .card, :root[data-theme] .card { background: #fff !important; border: 0 !important; box-shadow: none !important; padding: 0 !important; margin: 0 0 3mm !important; }
+            .card-title, :root[data-theme][data-theme] .card-title { color: #000 !important; text-shadow: none !important; font-size: 11px !important; margin: 0 0 2mm !important; padding: 0 !important; border: 0 !important; }
+            .card-title span:first-child { display: none; }
+
+            /* سەرەوە */
+            .print-head { display: block !important; margin: 0 0 4mm; border: 1.5px solid #000; border-radius: 4px; padding: 3mm 4mm; text-align: center; }
+            .ph-company { font-size: 18px; font-weight: bold; line-height: 1.4; }
+            .ph-title { font-size: 13px; margin: 1mm 0 3mm; color: #222; }
+            .ph-grid { display: grid; grid-template-columns: 2fr 1fr 1.4fr 1.6fr; gap: 0; border-top: 1px solid #000; }
+            .ph-grid > div { padding: 2mm 2mm 0; border-inline-start: 1px solid #999; }
+            .ph-grid > div:first-child { border-inline-start: 0; }
+            .ph-grid span { display: block; font-size: 8.5px; color: #444; }
+            .ph-grid b { font-size: 12px; color: #000; white-space: nowrap; }
+
+            /* کۆکراوەکان و مووچە */
+            #summary, #payGrid { display: grid !important; grid-template-columns: repeat(6, 1fr); gap: 2.5mm; margin: 0 0 3mm !important; }
+            #summary .sum:last-child { grid-column: span 2; }      /* ڕیزی دووەم بۆشایی نەمێنێت */
+            #payGrid { grid-template-columns: repeat(4, 1fr); }
+            #summary .sum, #payGrid .sum { background: #fff !important; border: 1px solid #777 !important; border-radius: 3px; padding: 1.8mm 1.5mm !important; box-shadow: none !important; break-inside: avoid; }
+            #summary .sl, #payGrid .sl { font-size: 8.5px !important; color: #333 !important; }
+            #summary .sv, #payGrid .sv { font-size: 12px !important; color: #000 !important; margin-top: 1mm !important; }
+            #summary .sm { font-size: 7.5px !important; color: #444 !important; }
+
+            /* خشتە */
+            .tw { overflow: visible !important; border: 0 !important; }
+            #attTable { min-width: 0 !important; width: 100% !important; font-size: 9px !important; border-collapse: collapse; }
+            #attTable thead { display: table-header-group; }
+            #attTable tr { break-inside: avoid; page-break-inside: avoid; }
+            #attTable th { background: #e4e4e4 !important; color: #000 !important; border: 1px solid #777 !important; padding: 1.4mm 1mm !important; font-size: 8.5px !important; white-space: normal !important; }
+            #attTable td { color: #000 !important; border: 1px solid #999 !important; padding: 0.9mm 1mm !important; font-size: 9px !important; }
+            #attTable tr.off td { background: #efefef !important; color: #444 !important; }
+            #attTable tr.upcoming td { opacity: 1 !important; color: #555 !important; }
+            #attTable .late, #attTable .early, #attTable .over, #attTable .work { color: #000 !important; }
+            .st { background: transparent !important; color: #000 !important; border: 1px solid #666; padding: 0 2mm !important; font-size: 8.5px !important; }
+            .ti { display: none !important; }
+            .pv { display: inline !important; }
+            input[type=time] { display: none !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="stars" id="stars"></div>
+
+    <button class="menu-toggle" onclick="toggleSidebar()" aria-label="مێنیۆ">☰</button>
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <div class="layout">
+        <!-- سایدبار: بە sidebar.js دروست دەکرێت -->
+        <aside class="sidebar" id="sidebar"></aside>
+
+        <main class="main-content">
+            <div class="container">
+
+                <div class="page-header">
+                    <div class="page-title">
+                        <span>🕒</span>
+                        <div>
+                            <div>ڕاپۆرتی هاتن و چوون</div>
+                            <small>لێرەدا دەتوانیت هاتن و چوونی کارمەندان بەپێی مانگ ببینیت و تۆماریان بکەیت</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- سەرەوەی پرینت: ناوی کۆمپانیا، کارمەند، ساڵ، مانگ، کاتی پرینت (تەنها لە پرینتدا دەردەکەوێت) -->
+                <div class="print-head" id="printHead">
+                    <div class="ph-company">کۆمپانیای قمر الفجر</div>
+                    <div class="ph-title">ڕاپۆرتی هاتن و چوون</div>
+                    <div class="ph-grid">
+                        <div><span>ناوی کارمەند</span><b id="phEmp">—</b></div>
+                        <div><span>ساڵ</span><b id="phYear" dir="ltr">—</b></div>
+                        <div><span>مانگ</span><b id="phMonth">—</b></div>
+                        <div><span>کاتی پرینت</span><b id="phTime" dir="ltr">—</b></div>
+                    </div>
+                </div>
+
+                <!-- ڕێکخستنی کاتی کار: بۆ هەر کارمەندێک، ٤ هەفتە × ٧ ڕۆژ -->
+                <div class="card no-print">
+                    <div class="card-title"><span>⚙️</span> ڕێکخستنی کاتی کار</div>
+                    <div class="form-grid">
+                        <div class="input-group"><label>لق</label><select id="sBranch" onchange="onSchedBranch()"></select></div>
+                        <div class="input-group"><label>ناوی کارمەند</label><select id="sEmp" onchange="onSchedEmp()"></select></div>
+                    </div>
+                    <div class="hint" id="schedHint"></div>
+                    <div class="tw" style="margin-top:12px"><div id="schedGrid"></div></div>
+                    <div class="message" id="setMsg" style="margin-top:14px"></div>
+                    <div class="toolbar">
+                        <button type="button" class="btn btn-secondary" onclick="addWeek()">➕ زیادکردنی هەفتە</button>
+                        <button type="button" class="btn btn-primary" onclick="saveSchedule()">💾 پاشەکەوتکردن</button>
+                    </div>
+                </div>
+
+                <!-- ئامێری پەنجەمۆر -->
+                <div class="card no-print">
+                    <div class="card-title"><span>🖐️</span> پەیوەستکردنی ئامێری پەنجەمۆر (Hikvision)</div>
+                    <div class="message" id="devMsg"></div>
+                    <div class="hint" style="margin-top:0">تۆمارەکانی Attendance لە ئامێری Hikvision (یان iVMS-4200) وەک CSV یان Excel دەربهێنە و لێرە هاوردەی بکە. یەکەم پەنجە لە ڕۆژێکدا = کاتی هاتن و دوایین پەنجە = کاتی چوون. کارمەندەکان بە ژمارەی ئامێر (Employee ID) یان بە ناو دەدۆزرێنەوە.</div>
+                    <div class="toolbar">
+                        <input type="file" id="devFile" accept=".csv,.txt,.xlsx,.xls" style="display:none" onchange="importDevice(this.files[0]); this.value=''">
+                        <button type="button" class="btn btn-primary" onclick="$('devFile').click()">📥 هاوردەکردنی تۆمارەکانی ئامێر</button>
+                        <button type="button" class="btn btn-secondary" onclick="openMap()">🆔 ژمارەی پەنجەمۆری کارمەندان</button>
+                    </div>
+                </div>
+
+                <!-- فلتەر -->
+                <div class="card no-print">
+                    <div class="card-title"><span>🔍</span> فلتەرکردن</div>
+                    <div class="form-grid">
+                        <div class="input-group"><label>لق</label><select id="fBranch" onchange="onBranch()"></select></div>
+                        <div class="input-group"><label>ناوی کارمەند</label><select id="fEmp" onchange="render()"></select></div>
+                        <div class="input-group"><label>ساڵ</label><select id="fYear" onchange="render()"></select></div>
+                        <div class="input-group"><label>مانگ</label><select id="fMonth" onchange="render()"></select></div>
+                    </div>
+                    <div class="toolbar">
+                        <button type="button" class="btn btn-success" onclick="toggleExtra()">➕ کارکردنی زیاتر</button>
+                        <button type="button" class="btn btn-primary" onclick="window.print()">🖨️ پرینت / PDF</button>
+                    </div>
+                </div>
+
+                <!-- کارکردنی زیاتر: ڕۆژی بێ دەوام یان کاتژمێری زیاتر، بۆ مووچە دەژمێردرێت -->
+                <div class="card no-print" id="extraCard" style="display:none">
+                    <div class="card-title"><span>➕</span> کارکردنی زیاتر</div>
+                    <div class="message" id="exMsg"></div>
+                    <div class="form-grid">
+                        <div class="input-group"><label>ناوی کارمەند</label><select id="exEmp" onchange="onExEmp()"></select></div>
+                        <div class="input-group"><label>لقی کارکردنی زیاتر</label><select id="exWork"></select></div>
+                        <div class="input-group"><label>جۆری کارکردنەکە</label>
+                            <select id="exType" onchange="onExType()"><option value="daily">ڕۆژانە</option><option value="hourly">کاتژمێری</option></select>
+                        </div>
+                        <div class="input-group" id="exDaysBox"><label>ڕۆژانە چەند ڕۆژ</label><input type="number" id="exDays" min="1" max="31" value="1" dir="ltr"></div>
+                        <div class="input-group" id="exHoursBox" style="display:none">
+                            <label>کاتژمێری</label>
+                            <div class="dur"><input type="time" id="exFrom" dir="ltr"> <span>بۆ</span> <input type="time" id="exTo" dir="ltr"></div>
+                        </div>
+                        <div class="input-group"><label>ڕێکەوت</label><input type="date" id="exDate"></div>
+                        <div class="input-group full-width"><label>تێبینی</label><input type="text" id="exNote"></div>
+                    </div>
+                    <div class="toolbar"><button type="button" class="btn btn-primary" id="exAddBtn" onclick="addExtra()">➕ زیادکردن</button><button type="button" class="btn btn-secondary" id="exCancelBtn" style="display:none" onclick="cancelExtraEdit()">✖ پاشگەزبوونەوە</button></div>
+                    <div class="sub-title">تۆمارەکانی کارکردنی زیاتر</div>
+                    <div id="exList"></div>
+                </div>
+
+                <div class="sum-grid" id="summary"></div>
+
+                <!-- مووچە بەپێی کاتژمێری کارکردن -->
+                <div class="card">
+                    <div class="card-title"><span>💰</span> مووچەی ئەم مانگە بەپێی کاتژمێری کارکردن</div>
+                    <div class="form-grid no-print">
+                        <div class="input-group"><label>مووچەی مانگانە</label><input type="text" id="salAmount" dir="ltr" inputmode="decimal" placeholder="2,100,000" oninput="formatMoneyInput(this); renderPay()"></div>
+                        <div class="input-group"><label>دراو</label><select id="salCur" onchange="renderPay()"><option value="IQD">دینار</option><option value="USD">دۆلار</option></select></div>
+                        <div class="input-group full-width">
+                            <label class="tgl"><input type="checkbox" id="payFp" onchange="onPayFp()"><span class="tgl-track"><span class="tgl-knob"></span></span><span>مووچە بەپێی پەنجەمۆر</span></label>
+                            <div class="hint">تەنها بۆ مانگی هەڵبژێردراو چالاک دەبێت؛ مووچەی مانگەکانی تر ناگۆڕێت</div>
+                        </div>
+                    </div>
+                    <div class="pay-grid" id="payGrid"></div>
+                </div>
+
+                <div class="card" style="margin-top:25px">
+                    <div class="card-title"><span>📋</span> خشتەی هاتن و چوون <span id="who" style="margin-right:auto; color:#64748b; font-size:12px;"></span></div>
+                    <div class="tw">
+                        <table class="data-table" id="attTable">
+                            <thead>
+                                <tr>
+                                    <th>ژمارە</th><th>ڕێکەوت</th><th>ڕۆژ</th><th>کاتی کار</th><th>دۆخ</th>
+                                    <th>کاتی هاتن</th><th>چوون بۆ پشوو</th><th>هاتنەوە لە پشوو</th><th>کاتی چوون</th>
+                                    <th>دواکەوتن</th><th>زوو چوونەوە</th><th>کارکردنی زیاتر</th><th>کاتژمێری کارکردن</th><th class="no-print"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="tb"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- مێنیوی سێ خاڵ -->
+    <div class="dm no-print" id="dotsMenu">
+        <button type="button" onclick="clearDay(dotsDate)">🗑️ سڕینەوە</button>
+        <button type="button" onclick="openStatus(dotsDate)">🔄 گۆڕینی دۆخ</button>
+    </div>
+
+    <!-- گۆڕینی دۆخی ڕۆژ -->
+    <div class="modal-overlay" id="stModal">
+        <div class="modal-content">
+            <div class="modal-header"><h2>🔄 گۆڕینی دۆخی ڕۆژ — <span id="stDate"></span></h2><button class="modal-close" onclick="closeStatus()">✕</button></div>
+            <input type="hidden" id="stKey">
+            <div class="input-group" style="margin-bottom:14px">
+                <label>دۆخ</label>
+                <select id="stType" onchange="onStType()">
+                    <option value="present">هاتوو</option>
+                    <option value="absent">نەهاتوو</option>
+                    <option value="leave">مۆڵەتی ڕۆژانە</option>
+                    <option value="hourly">مۆڵەتی کاتژمێری</option>
+                </select>
+            </div>
+            <div class="form-grid-modal" id="stHours" style="display:none; margin-bottom:14px">
+                <div class="input-group"><label>لە کاتژمێر</label><input type="time" id="stFrom" dir="ltr"></div>
+                <div class="input-group"><label>بۆ کاتژمێر</label><input type="time" id="stTo" dir="ltr"></div>
+            </div>
+            <div class="input-group"><label>تێبینی</label><input type="text" id="stNote"></div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-primary" onclick="saveStatus()">💾 پاشەکەوتکردن</button>
+                <button type="button" class="btn btn-secondary" onclick="removeStatus()">↩️ لابردنی دۆخی دەستی</button>
+                <button type="button" class="btn btn-secondary" onclick="closeStatus()">✖ داخستن</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ژمارەی پەنجەمۆری کارمەندان -->
+    <div class="modal-overlay" id="mapModal">
+        <div class="modal-content">
+            <div class="modal-header"><h2>🆔 ژمارەی پەنجەمۆری کارمەندان</h2><button class="modal-close" onclick="closeMap()">✕</button></div>
+            <div class="hint" style="margin-top:0">ئەو ژمارەیەی لە ئامێرەکەدا بۆ هەر کارمەندێک تۆمار کراوە (Employee ID) بنووسە.</div>
+            <div id="mapList" style="margin-top:10px"></div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-primary" onclick="saveMap()">💾 پاشەکەوتکردن</button>
+                <button type="button" class="btn btn-secondary" onclick="closeMap()">✖ داخستن</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="attendance-calc.js"></script>
+    <script>
+        const $ = id => document.getElementById(id);
+        const read = k => { try { return JSON.parse(localStorage.getItem(k)) || []; } catch (e) { return []; } };
+        const readMap = k => { try { return JSON.parse(localStorage.getItem(k)) || {}; } catch (e) { return {}; } };
+        const save = (k, v) => localStorage.setItem(k, JSON.stringify(v));
+        const T = k => (window.royaTr ? window.royaTr(k) : k);
+        const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+        const pad = n => String(n).padStart(2, '0');
+        const dmy = s => String(s).split('-').reverse().join('/');
+
+        const WEEK = ['یەکشەممە', 'دووشەممە', 'سێشەممە', 'چوارشەممە', 'پێنجشەممە', 'هەینی', 'شەممە'];   // getDay(): 0 = یەکشەممە
+        const DAY_ORDER = [6, 0, 1, 2, 3, 4, 5];                                                          // شەممە ... هەینی
+        const WEEK_NAMES = ['هەفتەی یەکەم', 'هەفتەی دووەم', 'هەفتەی سێیەم', 'هەفتەی چوارەم', 'هەفتەی پێنجەم'];
+        const MONTHS = ['کانوونی دووەم', 'شوبات', 'ئازار', 'نیسان', 'ئایار', 'حوزەیران', 'تەمموز', 'ئاب', 'ئەیلوول', 'تشرینی یەکەم', 'تشرینی دووەم', 'کانوونی یەکەم'];
+        const nameOf = e => {
+            const l = localStorage.getItem('royaLang') || 'ku';
+            return (l === 'ar' && e.nameAr) || (l === 'en' && e.nameEn) || e.nameKu || e.name || '—';
+        };
+
+        const { toMin, fmtDur, mkWeeks, buildDays, payFor, schedules, schedFor, extrasMap, contractSalary } = window.RoyaAtt;   // attendance-calc.js
+
+        /*DEV-START*/
+        // CSV (جیاکەرەوە: , ; یان Tab، قوتاب بە "")
+        function parseCsv(text) {
+            text = text.replace(/^\ufeff/, '');
+            const first = text.split(/\r?\n/)[0] || '';
+            const delim = [',', ';', '\t'].map(d => [d, first.split(d).length]).sort((a, b) => b[1] - a[1])[0][0];
+            const rows = []; let row = [], cur = '', q = false;
+            for (let i = 0; i < text.length; i++) {
+                const c = text[i];
+                if (q) { if (c === '"') { if (text[i + 1] === '"') { cur += '"'; i++; } else q = false; } else cur += c; }
+                else if (c === '"') q = true;
+                else if (c === delim) { row.push(cur); cur = ''; }
+                else if (c === '\n' || c === '\r') { if (c === '\r' && text[i + 1] === '\n') i++; row.push(cur); cur = ''; if (row.some(x => x.trim())) rows.push(row); row = []; }
+                else cur += c;
+            }
+            row.push(cur);
+            if (row.some(x => x.trim())) rows.push(row);
+            return rows;
+        }
+
+        // ڕێکەوت و کات: 2026-10-16 08:03:12 / 16/10/2026 08:03 / 10/16/2026 8:03 AM ...
+        function parseDT(s) {
+            const pd = n => String(n).padStart(2, '0');
+            s = String(s || '').trim();
+            if (!s) return null;
+            let m = s.match(/(\d{4})[-\/.](\d{1,2})[-\/.](\d{1,2})/), y, mo, d;
+            if (m) { y = +m[1]; mo = +m[2]; d = +m[3]; }
+            else if ((m = s.match(/(\d{1,2})[-\/.](\d{1,2})[-\/.](\d{2,4})/))) {
+                const a = +m[1], b = +m[2]; y = +m[3]; if (y < 100) y += 2000;
+                if (a > 12) { d = a; mo = b; } else if (b > 12) { mo = a; d = b; } else { d = a; mo = b; }
+            } else m = null;
+            const rest = m ? s.replace(m[0], ' ') : s;
+            const t = rest.match(/(\d{1,2}):(\d{2})(?::\d{2})?\s*(AM|PM)?/i);
+            let time = null;
+            if (t) { let h = +t[1]; if (t[3]) { const pm = /pm/i.test(t[3]); if (pm && h < 12) h += 12; if (!pm && h === 12) h = 0; } time = `${pd(h)}:${t[2]}`; }
+            return { date: m ? `${y}-${pd(mo)}-${pd(d)}` : null, time };
+        }
+
+        function detectCols(headers) {
+            const h = headers.map(x => String(x).trim().toLowerCase());
+            const find = (...res) => { for (const re of res) { const i = h.findIndex(x => re.test(x)); if (i !== -1) return i; } return -1; };
+            return {
+                id: find(/^(employee|person|user|staff|card)?\s*(id|no\.?|number)$/, /(employee|person|user|staff|card).*(id|no|number)/),
+                name: find(/name/),
+                dt: find(/date.*time|time.*date|attendance time|punch|check.?(in|time)/, /^time$/, /time/),
+                date: find(/^date$/)
+            };
+        }
+
+        const normId = s => { s = String(s || '').trim(); return /^\d+$/.test(s) ? String(+s) : s.toLowerCase(); };
+        const normName = s => String(s || '').trim().replace(/\s+/g, ' ').toLowerCase();
+
+        // تۆمارەکانی ئامێر => { 'empId|date': {in, out} } + ئەوانەی نەدۆزرانەوە
+        function processPunches(rows, employees, devMap) {
+            let hi = -1, cols = null;
+            for (let i = 0; i < Math.min(rows.length, 20); i++) {
+                const c = detectCols(rows[i]);
+                if ((c.id !== -1 || c.name !== -1) && c.dt !== -1) { hi = i; cols = c; break; }
+            }
+            if (!cols) return null;
+            const byDev = {}, byName = {};
+            Object.entries(devMap).forEach(([empId, dev]) => { if (dev) byDev[normId(dev)] = empId; });
+            employees.forEach(e => [e.name, e.nameKu, e.nameAr, e.nameEn, e.username].forEach(n => { if (n) byName[normName(n)] = e.id; }));
+            const punches = {}, missing = new Set();
+            for (let i = hi + 1; i < rows.length; i++) {
+                const r = rows[i];
+                const id = cols.id !== -1 ? normId(r[cols.id]) : '', nm = cols.name !== -1 ? normName(r[cols.name]) : '';
+                const empId = (id && byDev[id]) || (nm && byName[nm]) || null;
+                let dt = parseDT(r[cols.dt]);
+                if (dt && !dt.date && cols.date !== -1) { const d2 = parseDT(r[cols.date]); if (d2) dt = { date: d2.date, time: dt.time }; }
+                if (!dt || !dt.date || !dt.time) continue;
+                if (!empId) { missing.add(id || nm || '?'); continue; }
+                (punches[`${empId}|${dt.date}`] = punches[`${empId}|${dt.date}`] || []).push(toMinSafe(dt.time));
+            }
+            const out = {};
+            Object.entries(punches).forEach(([k, arr]) => {
+                arr.sort((x, y) => x - y);
+                const f = x => `${String(Math.floor(x / 60)).padStart(2, '0')}:${String(x % 60).padStart(2, '0')}`;
+                const last = arr[arr.length - 1];
+                const rec = { in: f(arr[0]), out: last - arr[0] >= 30 ? f(last) : '', bOut: '', bIn: '', src: 'device' };
+                // ٤ پەنجە یان زیاتر: گەورەترین بۆشایی لە نێوان هاتن و چوون = پشووی نان خواردن
+                if (arr.length >= 4 && rec.out) {
+                    let bi = 1, gap = -1;
+                    for (let j = 1; j <= arr.length - 3; j++) { const g = arr[j + 1] - arr[j]; if (g > gap) { gap = g; bi = j; } }
+                    rec.bOut = f(arr[bi]); rec.bIn = f(arr[bi + 1]);
+                }
+                out[k] = rec;
+            });
+            return { records: out, missing: [...missing] };
+        }
+        function toMinSafe(t) { const [h, m] = t.split(':').map(Number); return h * 60 + m; }
+        /*DEV-END*/
+
+        function formatMoneyInput(el) {
+            const before = el.value.slice(0, el.selectionStart).replace(/[^\d.]/g, '').length;
+            let raw = el.value.replace(/[^\d.]/g, '');
+            const dot = raw.indexOf('.');
+            if (dot !== -1) raw = raw.slice(0, dot + 1) + raw.slice(dot + 1).replace(/\./g, '').slice(0, 2);
+            const [i, d] = raw.split('.');
+            const out = i.replace(/\B(?=(\d{3})+(?!\d))/g, ',') + (d !== undefined ? '.' + d : '');
+            el.value = out;
+            let c = 0, p = 0;
+            while (p < out.length && c < before) { if (/[\d.]/.test(out[p])) c++; p++; }
+            el.setSelectionRange(p, p);
+        }
+        const parseMoney = s => Number(String(s || '').replace(/,/g, '')) || 0;
+        const msg = (id, t, type) => { const el = $(id); el.textContent = t; el.className = 'message ' + type + ' show'; clearTimeout(el._t); el._t = setTimeout(() => el.classList.remove('show'), 6000); };
+
+        /* ---------- خشتەی کاتی کار (بۆ هەر کارمەندێک) ---------- */
+        let edit = null, editKey = 'default', savedCount = 4;   // savedCount: ژمارەی هەفتە پاشەکەوتکراوەکان (ئەوانەی نوێ و پاشەکەوت نەکراون دەکرێت بسڕدرێنەوە)
+        function fillSchedBranches() {
+            $('sBranch').innerHTML = '<option value="">-- هەموو لقەکان --</option>' + read('branchesList').map(b => `<option value="${esc(b.id)}">${esc(b.name)}</option>`).join('');
+            fillSchedEmps();
+        }
+        function fillSchedEmps() {
+            const b = $('sBranch').value;
+            const list = read('employeesList').filter(e => e.status !== 'inactive' && (!b || e.branch === b || e.branch === 'all'));
+            $('sEmp').innerHTML = '<option value="default">-- هەموو کارمەندان (بنەڕەت) --</option>' + list.map(e => `<option value="${esc(e.id)}">${esc(nameOf(e))}</option>`).join('');
+            $('sEmp').value = list.some(e => e.id === editKey) || editKey === 'default' ? editKey : 'default';
+            editKey = $('sEmp').value;
+        }
+        function onSchedBranch() { fillSchedEmps(); loadEdit(); }
+        function onSchedEmp() { editKey = $('sEmp').value; loadEdit(); }
+
+        function loadEdit() {
+            const s = schedules(), emp = read('employeesList').find(e => e.id === editKey);
+            const own = s[editKey], sc = own || (emp ? schedFor(emp) : s.default);
+            edit = JSON.parse(JSON.stringify(sc.weeks));
+            savedCount = edit.length;
+            edit.forEach(w => w.forEach(c => { if (c.brk === undefined) c.brk = Number(sc.breakMin) || 0; }));
+            $('schedHint').textContent = (editKey !== 'default' && !own) ? 'ئەم کارمەندە خشتەی تایبەتی نییە، خشتەی بنەڕەت بەکاردێت. دوای پاشەکەوتکردن تایبەت دەبێت.' : '';
+            renderGrid();
+        }
+
+        const fmtHM = b => `${pad(Math.floor(b / 60))}:${pad(b % 60)}`;
+        function renderGrid() {
+            $('schedGrid').innerHTML = `<table class="sg"><thead><tr><th>هەفتە</th>${DAY_ORDER.map(d => `<th>${WEEK[d]}</th>`).join('')}</tr></thead><tbody>`
+                + edit.map((week, wi) => `<tr><th>${WEEK_NAMES[wi]}<br><button type="button" class="wdel" onclick="delWeek(${wi})" title="سڕینەوەی هەفتە">🗑️ سڕینەوەی هەفتە</button></th>${DAY_ORDER.map(d => {
+                    const c = week[d];
+                    return `<td class="${c.on ? 'on' : 'offc'}"><label class="cb"><input type="checkbox" ${c.on ? 'checked' : ''} onchange="cellOn(${wi},${d},this.checked)"><span>دەوام</span></label>`
+                        + (c.on ? `<input type="time" value="${c.start}" onchange="cellTime(${wi},${d},'start',this.value)"><input type="time" value="${c.end}" onchange="cellTime(${wi},${d},'end',this.value)">`
+                            + `<div class="brk"><span>پشوو&zwnj;</span><input type="text" class="dur1" value="${fmtHM(c.brk || 0)}" maxlength="5" inputmode="numeric" onchange="cellBrk(${wi},${d},this.value)"></div>`
+                            : '<em>پشوو</em>') + '</td>';
+                }).join('')}</tr>`).join('') + '</tbody></table>';
+        }
+        function cellOn(wi, d, on) {
+            const c = edit[wi][d]; c.on = on;
+            // کاتی ڕۆژێکی نوێ لە یەکێک لە ڕۆژە چالاکەکانی تر وەردەگیرێت (ئەگەر نەبوو ٠٨:٠٠ - ١٦:٠٠)
+            const ref = edit.flat().find(x => x.on && x.start && x.end) || { start: '08:00', end: '16:00', brk: 60 };
+            if (on && !c.start) { c.start = ref.start; c.end = ref.end; }
+            if (on && c.brk === undefined) c.brk = ref.brk !== undefined ? ref.brk : 60;
+            renderGrid();
+        }
+        function cellTime(wi, d, f, v) { edit[wi][d][f] = v; }
+        // ماوەی پشوو بە یەک خانە: «1:30» یان «130» = ١ کاتژمێر و ٣٠ خولەک، «30» = ٣٠ خولەک
+        function parseBrk(s) {
+            s = String(s || '').trim();
+            if (/^\d{1,2}:\d{1,2}$/.test(s)) { const [h, m] = s.split(':').map(Number); return h * 60 + Math.min(59, m); }
+            const dgt = s.replace(/\D/g, '');
+            if (dgt.length >= 3) return Number(dgt.slice(0, -2)) * 60 + Math.min(59, Number(dgt.slice(-2)));
+            return Number(dgt) || 0;
+        }
+        function cellBrk(wi, d, v) { edit[wi][d].brk = parseBrk(v); renderGrid(); }
+        function addWeek() {
+            if (edit.length >= 5) { msg('setMsg', 'زۆرترین ٥ هەفتە دەکرێت', 'error'); return; }
+            edit.push(JSON.parse(JSON.stringify(edit[edit.length - 1])));       // کۆپیی دوایین هەفتە
+            renderGrid();
+            msg('setMsg', `✅ هەفتەیەک زیاد کرا (${edit.length} هەفتە). بۆ ئەوەی بمێنێتەوە «پاشەکەوتکردن» دابگرە`, 'success');
+        }
+        // ڕۆژەکانی ئەو کارمەندانەی ئەم خشتەیەیان هەیە و زانیاریان تێدایە (هاتن و چوون، دۆخی دەستی، کارکردنی زیاتر)
+        // لە ڕۆژی fromDay ی مانگ بەدواوە. (سڕینەوەی هەفتەیەک هەفتەکانی دوای خۆی دەجووڵێنێت، بۆیە ئەوانیش دەپشکنرێن)
+        function weekDataDays(fromDay) {
+            const s = schedules(), emps = read('employeesList');
+            const usesDefault = e => !s[e.id] && !(e.branch && e.branch !== 'all' && s[e.branch]);
+            const ids = new Set(emps.filter(e => editKey === 'default' ? usesDefault(e) : e.id === editKey).map(e => e.id));
+            const hits = new Set(), dayOf = ds => Number(ds.slice(8, 10));
+            ['attendanceRecords', 'attendanceStatus'].forEach(k => Object.keys(readMap(k)).forEach(key => {
+                const [id, ds] = key.split('|');
+                if (ids.has(id) && dayOf(ds) >= fromDay) hits.add(ds);
+            }));
+            read('attendanceExtra').forEach(x => {
+                if (!ids.has(x.empId)) return;
+                const n = x.type === 'daily' ? (Number(x.days) || 1) : 1;
+                for (let i = 0; i < n; i++) { const ds = RoyaAtt.addDays(x.date, i); if (dayOf(ds) >= fromDay) hits.add(ds); }
+            });
+            return [...hits].sort();
+        }
+        function delWeek(wi) {
+            if (edit.length <= 1) { msg('setMsg', 'دەبێت لانیکەم یەک هەفتە بمێنێتەوە', 'error'); return; }
+            if (wi < savedCount) {                                   // هەفتەی پاشەکەوتکراو: ئەگەر زانیاری تێدا بێت ناسڕدرێتەوە
+                const hits = weekDataDays(7 * wi + 1);
+                if (hits.length) {
+                    const shown = hits.slice(0, 6).map(dmy).join('، ') + (hits.length > 6 ? ' ...' : '');
+                    msg('setMsg', `⛔ «${WEEK_NAMES[wi]}» ناسڕدرێتەوە: لەم هەفتەیە یان هەفتەکانی دوای ئەو زانیاری هەیە (${hits.length} ڕۆژ: ${shown}). سەرەتا ئەو زانیارییانە بسڕەوە، پاشان هەفتەکە بسڕەوە`, 'error');
+                    return;
+                }
+            }
+            if (!confirm(`دڵنیایت لە سڕینەوەی «${WEEK_NAMES[wi]}»؟`)) return;
+            edit.splice(wi, 1);
+            savedCount = Math.min(savedCount, edit.length);
+            renderGrid();
+            msg('setMsg', `🗑️ هەفتەیەک سڕایەوە (${edit.length} هەفتە ماوە). بۆ پاشەکەوتکردنی گۆڕانکارییەکە «پاشەکەوتکردن» دابگرە`, 'success');
+        }
+        function saveSchedule() {
+            for (const w of edit) for (const c of w) if (c.on) {
+                if (!c.start || !c.end || toMin(c.start) >= toMin(c.end)) { msg('setMsg', 'لە هەندێک ڕۆژ کاتی دەستپێک دەبێت پێش کۆتایی بێت', 'error'); return; }
+                if ((c.brk || 0) >= toMin(c.end) - toMin(c.start)) { msg('setMsg', 'ماوەی پشوو دەبێت لە کاتژمێرەکانی کار کەمتر بێت', 'error'); return; }
+            }
+            const s = readMap('attendanceSchedules');
+            if (!s.default) s.default = schedules().default;
+            s[editKey] = { weeks: edit };
+            save('attendanceSchedules', s);
+            savedCount = edit.length;
+            msg('setMsg', '✅ خشتەی کاتی کار پاشەکەوت کرا', 'success');
+            render();
+        }
+
+        /* ---------- کارکردنی زیاتر ---------- */
+        let exEditId = null;
+        function toggleExtra() {
+            const c = $('extraCard'), open = c.style.display === 'none';
+            c.style.display = open ? '' : 'none';
+            if (!open) return;
+            $('exWork').innerHTML = read('branchesList').map(b => `<option value="${esc(b.id)}">${esc(b.name)}</option>`).join('');
+            $('exEmp').innerHTML = read('employeesList').filter(e => e.status !== 'inactive').map(e => `<option value="${esc(e.id)}">${esc(nameOf(e))}</option>`).join('');
+            if ($('fEmp').value) $('exEmp').value = $('fEmp').value;
+            $('exType').value = 'daily'; $('exDays').value = 1; $('exFrom').value = ''; $('exTo').value = '';
+            $('exDate').value = new Date().toISOString().slice(0, 10);
+            cancelExtraEdit(); onExType(); onExEmp();
+            c.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        // لقی کارکردنی زیاتر: بنەڕەت لقی خۆی کارمەندەکەیە (دەتوانیت بیگۆڕیت)
+        function onExEmp() {
+            const emp = read('employeesList').find(e => e.id === $('exEmp').value);
+            if (emp && emp.branch && emp.branch !== 'all') $('exWork').value = emp.branch;
+            renderExtraList();
+        }
+        function onExType() {
+            const daily = $('exType').value === 'daily';
+            $('exDaysBox').style.display = daily ? '' : 'none';
+            $('exHoursBox').style.display = daily ? 'none' : '';
+        }
+        function addExtra() {
+            const empId = $('exEmp').value, date = $('exDate').value, type = $('exType').value;
+            if (!empId) { msg('exMsg', 'تکایە کارمەندێک هەڵبژێرە', 'error'); return; }
+            if (!$('exWork').value) { msg('exMsg', 'تکایە لقی کارکردنی زیاتر هەڵبژێرە', 'error'); return; }
+            if (!date) { msg('exMsg', 'تکایە ڕێکەوت دیاری بکە', 'error'); return; }
+            const rec = { empId, branchId: $('exWork').value, type, date, note: $('exNote').value.trim() };
+            let what;
+            if (type === 'daily') {
+                const days = Number($('exDays').value);
+                if (!Number.isInteger(days) || days < 1 || days > 31) { msg('exMsg', 'ژمارەی ڕۆژەکان دەبێت لە ١ تا ٣١ بێت', 'error'); return; }
+                rec.days = days; what = `${days} ڕۆژ`;
+            } else {
+                const from = $('exFrom').value, to = $('exTo').value;
+                if (!from || !to || toMin(to) <= toMin(from)) { msg('exMsg', 'کاتی کۆتایی دەبێت دوای کاتی دەستپێک بێت', 'error'); return; }
+                rec.from = from; rec.to = to; what = fmtDur(toMin(to) - toMin(from));
+            }
+            const list = read('attendanceExtra'), i = exEditId ? list.findIndex(x => x.id === exEditId) : -1;
+            if (i !== -1) list[i] = Object.assign({ id: exEditId }, rec); else list.push(Object.assign({ id: 'ex-' + Date.now() }, rec));
+            save('attendanceExtra', list);
+            msg('exMsg', `✅ ${i !== -1 ? 'گۆڕانکارییەکە پاشەکەوت کرا' : 'کارکردنی زیاتر تۆمار کرا'}: ${what}`, 'success');
+            cancelExtraEdit();
+            renderExtraList(); render();
+        }
+        function editExtra(id) {
+            const x = read('attendanceExtra').find(v => v.id === id);
+            if (!x) return;
+            exEditId = id;
+            $('exEmp').value = x.empId; $('exWork').value = x.branchId; $('exType').value = x.type === 'daily' ? 'daily' : 'hourly';
+            $('exDays').value = x.days || 1; $('exFrom').value = x.from || ''; $('exTo').value = x.to || ''; $('exDate').value = x.date; $('exNote').value = x.note || '';
+            onExType();
+            $('exAddBtn').textContent = '💾 پاشەکەوتکردنی گۆڕانکاری'; $('exCancelBtn').style.display = '';
+            renderExtraList();
+            $('extraCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        function cancelExtraEdit() {
+            exEditId = null; $('exNote').value = '';
+            $('exAddBtn').textContent = '➕ زیادکردن'; $('exCancelBtn').style.display = 'none';
+        }
+        function delExtra(id) {
+            if (!confirm('دڵنیایت لە سڕینەوەی ئەم تۆمارە؟')) return;
+            save('attendanceExtra', read('attendanceExtra').filter(x => x.id !== id));
+            renderExtraList(); render();
+        }
+        function renderExtraList() {
+            const id = $('exEmp').value, pre = `${$('fYear').value}-${pad($('fMonth').value)}-`, bs = read('branchesList');
+            const list = read('attendanceExtra').filter(x => x.empId === id && x.date.startsWith(pre)).sort((a, b) => a.date.localeCompare(b.date));
+            $('exList').innerHTML = list.length ? list.map(x => {
+                const what = x.type === 'daily'
+                    ? `<b dir="ltr">${Number(x.days) || 1}</b> <span>ڕۆژ</span> <span>ڕۆژانە</span>`
+                    : `<b dir="ltr">${x.from} - ${x.to}</b> · ${fmtDur(toMin(x.to) - toMin(x.from))}`;
+                return `<div class="exr"><span><b dir="ltr">${dmy(x.date)}</b> · ${what} · ${esc((bs.find(b => b.id === x.branchId) || {}).name || '')}${x.note ? ' · ' + esc(x.note) : ''}</span>
+                    <span><button type="button" onclick="editExtra('${esc(x.id)}')" title="دەستکاری" style="color:#7dd3fc">✏️</button> <button type="button" onclick="delExtra('${esc(x.id)}')" title="سڕینەوە">🗑️</button></span></div>`;
+            }).join('') : '<div class="exr">هیچ تۆمارێک نییە</div>';
+        }
+
+        /* ---------- ئامێری پەنجەمۆر ---------- */
+        function loadXlsx() {
+            if (window.XLSX) return Promise.resolve();
+            return new Promise((res, rej) => {
+                const s = document.createElement('script');
+                s.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+                s.onload = res; s.onerror = () => rej(new Error('xlsx'));
+                document.head.appendChild(s);
+            });
+        }
+
+        async function importDevice(file) {
+            if (!file) return;
+            try {
+                let text;
+                if (/\.xlsx?$/i.test(file.name)) {
+                    await loadXlsx();
+                    const wb = XLSX.read(await file.arrayBuffer(), { type: 'array', cellDates: true });
+                    text = XLSX.utils.sheet_to_csv(wb.Sheets[wb.SheetNames[0]], { FS: ',', dateNF: 'yyyy-mm-dd hh:mm:ss' });
+                } else text = await file.text();
+                const res = processPunches(parseCsv(text), read('employeesList'), readMap('attendanceDeviceMap'));
+                if (!res) { msg('devMsg', '⚠️ ستوونەکانی ژمارەی کارمەند و کات لە فایلەکەدا نەدۆزرانەوە. دڵنیابە سەرەوەی خشتەکە (Employee ID, Name, Time) هەیە.', 'error'); return; }
+                const keys = Object.keys(res.records);
+                const map = readMap('attendanceRecords');
+                keys.forEach(k => { map[k] = Object.assign({}, map[k], res.records[k]); });
+                save('attendanceRecords', map);
+                const emps = new Set(keys.map(k => k.split('|')[0])).size;
+                let t = keys.length ? `✅ ${keys.length} ڕۆژ بۆ ${emps} کارمەند هاوردە کرا` : '⚠️ هیچ تۆمارێکی گونجاو نەدۆزرایەوە';
+                if (res.missing.length) t += ` — ئەم ژمارە/ناوانە نەدۆزرانەوە: ${res.missing.slice(0, 8).join('، ')}${res.missing.length > 8 ? ' ...' : ''} (لە «ژمارەی پەنجەمۆری کارمەندان» دایان بنێ)`;
+                msg('devMsg', t, keys.length ? 'success' : 'error');
+                render();
+            } catch (e) { msg('devMsg', '⚠️ فایلەکە نەخوێندرایەوە. بۆ Excel ئینتەرنێت پێویستە؛ یان وەک CSV دەربهێنە.', 'error'); }
+        }
+
+        function openMap() {
+            const m = readMap('attendanceDeviceMap');
+            $('mapList').innerHTML = read('employeesList').filter(e => e.status !== 'inactive').map(e => `<div class="map-row"><span>${esc(nameOf(e))}</span><input type="text" data-id="${esc(e.id)}" value="${esc(m[e.id] || '')}" placeholder="ID"></div>`).join('');
+            $('mapModal').classList.add('active');
+        }
+        function closeMap() { $('mapModal').classList.remove('active'); }
+        function saveMap() {
+            const m = {};
+            document.querySelectorAll('#mapList input').forEach(i => { if (i.value.trim()) m[i.dataset.id] = i.value.trim(); });
+            save('attendanceDeviceMap', m);
+            closeMap();
+            msg('devMsg', '✅ ژمارەکانی پەنجەمۆر پاشەکەوت کران', 'success');
+        }
+
+        /* ---------- فلتەرەکان ---------- */
+        function fillFilters() {
+            const y = new Date().getFullYear();
+            $('fYear').innerHTML = Array.from({ length: 7 }, (_, i) => y + 1 - i).map(v => `<option value="${v}">${v}</option>`).join('');
+            $('fYear').value = y;
+            fillMonths();
+            $('fBranch').innerHTML = '<option value="">-- هەموو لقەکان --</option>' + read('branchesList').map(b => `<option value="${esc(b.id)}">${esc(b.name)}</option>`).join('');
+            fillEmp();
+        }
+        function fillMonths() {
+            const cur = $('fMonth').value;
+            $('fMonth').innerHTML = MONTHS.map((m, i) => `<option value="${i + 1}">${T(m)} (${i + 1})</option>`).join('');
+            $('fMonth').value = cur !== '' ? cur : String(new Date().getMonth() + 1);
+        }
+        function fillEmp() {
+            const b = $('fBranch').value, cur = $('fEmp').value;
+            const list = read('employeesList').filter(e => e.status !== 'inactive' && (!b || e.branch === b || e.branch === 'all'));
+            $('fEmp').innerHTML = list.map(e => `<option value="${esc(e.id)}">${esc(nameOf(e))}</option>`).join('');
+            if (list.some(e => e.id === cur)) $('fEmp').value = cur;
+        }
+        function onBranch() { fillEmp(); render(); }
+
+        /* ---------- تۆمارکردنی کاتی هاتن و چوون (دەستی) ---------- */
+        function saveTime(date, field, value) {
+            const id = $('fEmp').value;
+            if (!id) return;
+            const map = readMap('attendanceRecords'), key = `${id}|${date}`, rec = map[key] || {};
+            if (value) rec[field] = value; else delete rec[field];
+            if (rec.in && rec.out && toMin(rec.out) <= toMin(rec.in)) { alert('کاتی چوون دەبێت دوای کاتی هاتن بێت'); render(); return; }
+            if (rec.bOut && rec.bIn && toMin(rec.bIn) <= toMin(rec.bOut)) { alert('کاتی هاتنەوە لە پشوو دەبێت دوای کاتی چوون بۆ پشوو بێت'); render(); return; }
+            if (rec.in || rec.out || rec.bOut || rec.bIn) map[key] = rec; else delete map[key];
+            save('attendanceRecords', map);
+            render();
+        }
+        /* ---------- سێ خاڵ (⋮): سڕینەوە و گۆڕینی دۆخی ڕۆژ ---------- */
+        let dotsDate = null;
+        function showDots(ev, date) {
+            ev.stopPropagation();
+            const m = $('dotsMenu'), btn = ev.currentTarget;
+            if (dotsDate === date && m.classList.contains('show')) { m.classList.remove('show'); dotsDate = null; return; }
+            dotsDate = date;
+            m.style.visibility = 'hidden'; m.classList.add('show');
+            const r = btn.getBoundingClientRect(), w = m.offsetWidth, h = m.offsetHeight;
+            const left = Math.min(Math.max(r.left, 8), window.innerWidth - w - 8);
+            let top = r.bottom + 4;
+            if (top + h > window.innerHeight - 8) top = Math.max(8, r.top - h - 4);
+            m.style.left = left + 'px'; m.style.top = top + 'px'; m.style.visibility = 'visible';
+        }
+        document.addEventListener('click', () => $('dotsMenu').classList.remove('show'));
+
+        // سڕینەوە: کاتی هاتن، چوون، پشوو (هەموو) و دۆخی دەستی ئەو ڕۆژە ڕەش دەکرێتەوە
+        function clearDay(date) {
+            const id = $('fEmp').value, key = `${id}|${date}`;
+            if (!id || !confirm('دڵنیایت لە سڕینەوەی هەموو کاتەکانی ئەم ڕۆژە (هاتن، چوون، پشوو)؟')) return;
+            const rec = readMap('attendanceRecords'); delete rec[key]; save('attendanceRecords', rec);
+            const st = readMap('attendanceStatus'); delete st[key]; save('attendanceStatus', st);
+            render();
+        }
+        function openStatus(date) {
+            const id = $('fEmp').value;
+            if (!id) return;
+            const key = `${id}|${date}`, o = readMap('attendanceStatus')[key] || {};
+            $('stKey').value = key; $('stDate').textContent = dmy(date);
+            $('stType').value = o.type || 'present';
+            $('stFrom').value = o.from || ''; $('stTo').value = o.to || ''; $('stNote').value = o.note || '';
+            onStType();
+            $('stModal').classList.add('active');
+        }
+        function onStType() { $('stHours').style.display = $('stType').value === 'hourly' ? '' : 'none'; }
+        function closeStatus() { $('stModal').classList.remove('active'); }
+        function saveStatus() {
+            const key = $('stKey').value, type = $('stType').value, from = $('stFrom').value, to = $('stTo').value, note = $('stNote').value.trim();
+            if (type === 'hourly' && (!from || !to || toMin(to) <= toMin(from))) { alert('کاتی کۆتایی مۆڵەت دەبێت دوای کاتی دەستپێک بێت'); return; }
+            const st = readMap('attendanceStatus');
+            st[key] = type === 'hourly' ? { type, from, to, note } : { type, note };
+            save('attendanceStatus', st);
+            closeStatus(); render();
+        }
+        function removeStatus() {
+            const st = readMap('attendanceStatus'); delete st[$('stKey').value]; save('attendanceStatus', st);
+            closeStatus(); render();
+        }
+
+
+        /* ---------- پیشاندان ---------- */
+        const STATUS_TXT = { present: 'هاتوو', absent: 'نەهاتوو', leave: 'مۆڵەت', off: 'پشوو', upcoming: 'داهاتوو', restwork: 'هاتووە لە پشوو', extra: 'کارکردنی زیاتر', hourly: 'کاتژمێری' };
+        let cur = null, salKey = '';
+
+        function render() {
+            const emp = read('employeesList').find(e => e.id === $('fEmp').value);
+            if (!emp) {
+                cur = null; $('who').textContent = ''; $('summary').innerHTML = ''; $('payGrid').innerHTML = '';
+                $('tb').innerHTML = '<tr><td colspan="14" class="empty">هیچ کارمەندێک تۆمار نەکراوە</td></tr>';
+                return;
+            }
+            const y = +$('fYear').value, m = +$('fMonth').value, today = new Date().toISOString().slice(0, 10), leaves = read('leaveRequests');
+            const { rows, tot } = buildDays(emp, y, m, schedFor(emp), readMap('attendanceRecords'), leaves, today, extrasMap(), readMap('attendanceStatus'));
+            const pre = `${y}-${pad(m)}-`;
+            const hourlyMin = tot.hourlyManual + leaves.filter(l => ((l.employee || l.employeeName) === emp.name) && (l.status === 'پەسەندکراو' || l.status === 'approved')
+                && (l.typeLabel || l.leaveType || '') === 'کاتژمێری' && String(l.startDate || '').startsWith(pre)).reduce((s, l) => s + (Number(l.amount) || 0), 0);
+            cur = { tot };
+            $('who').textContent = nameOf(emp);
+            $('phEmp').textContent = nameOf(emp); $('phYear').textContent = y; $('phMonth').textContent = `${T(MONTHS[m - 1])} (${m})`;
+            updatePrintTime();
+            $('payFp').checked = RoyaAtt.isFingerprintPay(emp.id, y, m);
+
+            const box = (cls, label, val, sub) => `<div class="sum ${cls}"><div class="sl">${label}</div><div class="sv">${val}</div>${sub ? `<div class="sm">${sub}</div>` : ''}</div>`;
+            $('summary').innerHTML =
+                box('', 'ڕۆژانی کار', tot.workDays, `لە ${tot.dim} ڕۆژ`) + box('s-in', 'کۆی هاتن', tot.present) + box('s-out', 'کۆی نەهاتن', tot.absent)
+                + box('s-leave', 'کۆی مۆڵەتی ڕۆژانە', tot.leaveDays) + box('s-leave', 'کۆی مۆڵەتی کاتژمێری', fmtDur(hourlyMin))
+                + box('s-rest', 'کۆی مۆڵەتی پشوو', fmtDur(tot.breakTaken)) + box('s-rest', 'کۆی مۆڵەتی هاتنەوە لە پشوو', fmtDur(tot.lateReturn))
+                + box('s-late', 'کۆی دواکەوتن', fmtDur(tot.late)) + box('s-early', 'کۆی زوو چوونەوە', fmtDur(tot.early))
+                + box('s-over', 'کۆی کارکردنی زیاتر', fmtDur(tot.extra)) + box('s-work', 'کۆی کاتژمێری کارکردن', fmtDur(tot.worked));
+
+            $('tb').innerHTML = rows.map(r => {
+                const editable = ['present', 'absent', 'restwork', 'off', 'extra', 'hourly'].includes(r.status);
+                const time = f => editable ? `<input class="ti" type="time" value="${r[f]}" onchange="saveTime('${r.date}', '${f}', this.value)"><span class="pv dt">${r[f] || '—'}</span>` : (r[f] ? `<span class="dt">${r[f]}</span>` : '—');
+                const tip = r.status === 'restwork' ? ' title="حیساب ناکرێت، بۆ حیسابکردن لە «کارکردنی زیاتر» تۆماری بکە"' : (r.note ? ` title="${esc(r.note)}"` : '');
+                const hrs = r.status === 'hourly' && r.hFrom ? `<div class="sm dt">${r.hFrom} - ${r.hTo}</div>` : '';
+                return `<tr class="${r.status === 'off' || r.status === 'upcoming' ? r.status : ''}">
+                    <td>${r.n}</td><td class="dt">${dmy(r.date)}</td><td>${WEEK[r.wd]}</td>
+                    <td class="dt">${r.on ? r.start + ' - ' + r.end : '—'}</td>
+                    <td><span class="st ${r.status}"${tip}>${STATUS_TXT[r.status]}</span>${hrs}</td>
+                    <td>${time('in')}</td><td>${time('bOut')}</td><td>${time('bIn')}</td><td>${time('out')}</td>
+                    <td class="late">${fmtDur(r.late)}</td><td class="early">${fmtDur(r.early)}</td><td class="over">${fmtDur(r.extra)}</td><td class="work">${fmtDur(r.worked)}</td>
+                    <td class="no-print"><button type="button" class="dots" onclick="showDots(event, '${r.date}')" aria-label="⋮">⋮</button></td></tr>`;
+            }).join('');
+
+            // مووچەی مانگانە لە گرێبەستەوە پڕ دەکرێتەوە (تەنها کاتێک کارمەند/مانگ دەگۆڕێت)
+            const key = `${emp.id}|${y}-${m}`;
+            if (key !== salKey) {
+                salKey = key;
+                const c = contractSalary(emp, y, m, false);
+                $('salAmount').value = c ? Number(c.salary).toLocaleString('en-US') : '';
+                $('salCur').value = c && c.currency === 'USD' ? 'USD' : 'IQD';
+            }
+            renderPay();
+            if ($('extraCard').style.display !== 'none') renderExtraList();
+        }
+
+        // «مووچە بەپێی پەنجەمۆر»: بۆ ئەو کارمەندە و ئەو مانگەی هەڵبژێردراو (مانگەکانی تر ناگۆڕێن)
+        function onPayFp() {
+            const id = $('fEmp').value;
+            if (!id) return;
+            RoyaAtt.setFingerprintPay(id, +$('fYear').value, +$('fMonth').value, $('payFp').checked);
+        }
+
+        function renderPay() {
+            if (!cur) return;
+            const tot = cur.tot, salary = parseMoney($('salAmount').value), c = $('salCur').value, unit = c === 'USD' ? 'دۆلار' : 'دینار';
+            const p = payFor(tot, salary, c, true);
+            const box = (cls, label, val) => `<div class="sum ${cls}"><div class="sl">${label}</div><div class="sv">${val}</div></div>`;
+            $('payGrid').innerHTML = box('s-rest', 'کۆی کاتژمێری پێویست', fmtDur(tot.schedMin))
+                + box('s-work', 'کۆی کاتژمێری کارکردن', fmtDur(p ? p.paidMin : tot.worked))
+                + box('s-leave', 'نرخی کاتژمێرێک', p ? `${(c === 'USD' ? Math.round(p.rate * 100) / 100 : Math.round(p.rate)).toLocaleString('en-US')} ${unit}` : '—')
+                + box('s-pay', 'مووچەی ئەم مانگە', p ? `${p.amount.toLocaleString('en-US')} ${unit}` : '—');
+        }
+
+        // کەی پرینت کراوە: ڕێکەوت و کاتژمێر (کاتێک پرینت دەکرێت نوێ دەبێتەوە)
+        function updatePrintTime() {
+            const n = new Date();
+            $('phTime').textContent = `${pad(n.getDate())}/${pad(n.getMonth() + 1)}/${n.getFullYear()} ${pad(n.getHours())}:${pad(n.getMinutes())}`;
+        }
+        window.addEventListener('beforeprint', updatePrintTime);
+
+        function toggleSidebar() { $('sidebar').classList.toggle('open'); $('sidebarOverlay').classList.toggle('active'); }
+        function createStars() {
+            const box = $('stars');
+            for (let i = 0; i < (window.innerWidth < 768 ? 40 : 80); i++) {
+                const s = document.createElement('div'), z = Math.random() * 2 + 1;
+                s.className = 'star';
+                s.style.cssText = `width:${z}px;height:${z}px;left:${Math.random() * 100}%;top:${Math.random() * 100}%;animation-delay:${Math.random() * 3}s;animation-duration:${Math.random() * 2 + 2}s`;
+                box.appendChild(s);
+            }
+        }
+
+        $('mapModal').addEventListener('click', e => { if (e.target === $('mapModal')) closeMap(); });
+        $('stModal').addEventListener('click', e => { if (e.target === $('stModal')) closeStatus(); });
+        fillSchedBranches(); loadEdit();
+        fillFilters();
+        render();
+        createStars();
+        window.addEventListener('royaLangChanged', () => { fillMonths(); fillEmp(); fillSchedEmps(); render(); });
+    </script>
+    <script src="../add-employee/sidebar.js"></script>
+</body>
+</html>

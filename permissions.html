@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ku" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#030407">
+    <title>دەسەڵاتی کارمەند - سیستەمی مۆڵەت</title>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="permissions.css">
+    <style>
+        .form-grid { grid-template-columns: repeat(3, 1fr); }
+        @media (max-width: 900px) { .form-grid { grid-template-columns: 1fr; } }
+        .permission-section.denied { opacity: 1; }
+        .permission-section.denied .permission-sub-list { opacity: 0.4; }
+        .permission-sub input:disabled { cursor: not-allowed; }
+    </style>
+</head>
+<body>
+
+    <div class="stars" id="stars"></div>
+
+    <button class="menu-toggle" onclick="toggleSidebar()" aria-label="مێنیۆ">☰</button>
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <div class="layout">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">🌙 سیستەمی مۆڵەت</div>
+            <a href="../dashboard/dashboard.html" class="nav-item"><span class="icon">🏠</span> پەڕەی سەرەکی</a>
+            <a href="../request-leave/request.html" class="nav-item"><span class="icon">📄</span> داواکردنی مۆڵەت</a>
+            <a href="../response-leave/response.html" class="nav-item"><span class="icon">✅</span> وەڵامدانەوەی مۆڵەت</a>
+            <a href="../reports/reports.html" class="nav-item"><span class="icon">📊</span> ڕاپۆرتەکان</a>
+            <a href="../add-employee/employee.html" class="nav-item"><span class="icon">👤</span> زیادکردنی کارمەند</a>
+            <a href="../permissions/permissions.html" class="nav-item active"><span class="icon">🔒</span> دەسەڵاتەکانی کارمەند</a>
+        </aside>
+
+        <main class="main-content">
+            <div class="container">
+                <div class="top-header">
+                    <div>
+                        <h1>بەڕێوەبردنی دەسەڵاتی کارمەندان و ڕۆڵەکان</h1>
+                        <p>لێرەدا دەتوانیت ڕۆڵ و دەسەڵاتی هەر کارمەندێک بە وردی دیاری بکەیت.</p>
+                    </div>
+                    <div style="font-size: 28px;">🔒</div>
+                </div>
+
+                <!-- بەشی ١: گەڕان و هەڵبژاردنی کارمەند -->
+                <div class="section-card">
+                    <div class="section-title">🔍 گەڕان و هەڵبژاردنی کارمەند</div>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>ڕۆڵ</label>
+                            <select id="roleSelect" class="form-control" onchange="populateEmployeeSelect()">
+                                <option value="">-- هەموو ڕۆڵەکان --</option>
+                                <option value="employee">کارمەند</option>
+                                <option value="dept-manager">بەڕێوەبەری لق</option>
+                                <option value="general-manager">بەڕێوەبەری گشتی</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>لق</label>
+                            <select id="branchSelect" class="form-control" onchange="populateEmployeeSelect()">
+                                <option value="">-- هەموو لقەکان --</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>ناوی کارمەند</label>
+                            <select id="employeeSelect" class="form-control" onchange="onEmployeeChange()">
+                                <option value="">-- کارمەند هەڵبژێرە --</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- بەشی ٢: شەش بەشەکە (کاتێک کارمەند هەڵبژێردرا) -->
+                <div class="section-card" id="permissionsCard" style="display: none;">
+                    <div class="section-title">
+                        <span>⚙️ دەسەڵاتەکانی <span id="selectedEmpName" style="color:#fbbf24;"></span></span>
+                        <button class="btn btn-success btn-sm" onclick="saveEmployeePermissions()">💾 پاشەکەوتکردنی دەسەڵاتەکان</button>
+                    </div>
+                    <div id="permissionsContainer" class="permissions-container"></div>
+                </div>
+
+                <!-- بەشی ٣: خشتەی کورتە -->
+                <div class="section-card">
+                    <div class="section-title">
+                        📋 کورتەی دەسەڵاتەکانی هەموو کارمەندان
+                        <div class="table-controls">
+                            <button class="btn btn-success btn-sm" onclick="selectAllPermissions(true)">✅ هەمووی</button>
+                            <button class="btn btn-danger btn-sm" onclick="selectAllPermissions(false)">❌ هیچیان</button>
+                            <button class="btn btn-primary btn-sm" onclick="saveAllPermissions()">💾 پاشەکەوتکردنی هەموو</button>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="data-table" id="permissionsTable">
+                            <thead>
+                                <tr>
+                                    <th>ناوی کارمەند</th>
+                                    <th>ڕۆڵ</th>
+                                    <th>🏠 پەڕەی سەرەکی</th>
+                                    <th>📄 داواکردنی مۆڵەت</th>
+                                    <th>✅ وەڵامدانەوە</th>
+                                    <th>📊 ڕاپۆرتەکان</th>
+                                    <th>👤 زیادکردنی کارمەند</th>
+                                    <th>🔒 دەسەڵاتی کارمەند</th>
+                                    <th>کردارەکان</th>
+                                </tr>
+                            </thead>
+                            <tbody id="permissionsTableBody">
+                                <tr><td colspan="9" class="empty-row">خشتەکە لە حاڵەتی بارکردندایە...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <script src="permissions.js"></script>
+</body>
+</html>

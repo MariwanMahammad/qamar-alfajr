@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="ku" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <!-- ✅ گرنگترین شت: ئەم مێتا تەیگە وا دەکات لە مۆبایل ڕێک بێت -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#030407">
+    <meta name="description" content="سیستەمی Roya بۆ مۆڵەتی کارمەندان - کۆمپانیای قمر الفجر">
+    <title>کۆمپانیای قمر الفجر - سیستەمی Roya</title>
+
+    <style>
+        /* ============================================
+           ڕێکخستنی بنەڕەتی
+           ============================================ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            /* پاشبنە لەگەڵ ڕەنگی ئاسمانی شەو */
+            background: radial-gradient(ellipse at center, #0a0e1a 0%, #030407 70%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', Tahoma, 'Noto Kufi Arabic', sans-serif;
+            color: #fff;
+            position: relative;
+        }
+
+        /* ============================================
+           ئەستێرەکانی پاشبنە
+           ============================================ */
+        .stars {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .star {
+            position: absolute;
+            background: #fff;
+            border-radius: 50%;
+            animation: twinkle 3s infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.2; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.3); }
+        }
+
+        /* ============================================
+           کۆنتەینەری سەرەکی
+           ============================================ */
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            text-align: center;
+            padding: 20px;
+            z-index: 2;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            animation: fadeIn 1s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .container:active {
+            transform: scale(0.98);
+        }
+
+        /* ============================================
+           مانگ - قەبارە زیرەک (Responsive)
+           ============================================ */
+        .moon {
+            /* clamp() قەبارەکە بەپێی شاشە دیاری دەکات */
+            width: clamp(120px, 40vw, 200px);
+            height: clamp(120px, 40vw, 200px);
+            background: black;
+            border-radius: 50%;
+            position: relative;
+            box-shadow: 0 0 40px rgba(0, 243, 255, 0.15);
+            transition: 0.5s;
+            margin-bottom: clamp(20px, 5vh, 40px);
+        }
+
+        .moon::before {
+            content: '';
+            background: #fff;
+            position: absolute;
+            display: block;
+            height: 100%;
+            width: 100%;
+            border-radius: 50%;
+            z-index: -1;
+            animation: moonAnim 3.2s infinite linear;
+        }
+
+        @keyframes moonAnim {
+            0% {
+                transform: translateX(40px) scale(0.9);
+                box-shadow: none;
+            }
+            50% {
+                transform: translateX(0px) scale(1.02);
+                box-shadow: 0 0 15px #fff, 0 0 30px #00f3ff, 0 0 60px #00f3ff;
+            }
+            100% {
+                transform: translateX(-40px) scale(0.9);
+                box-shadow: none;
+            }
+        }
+
+        /* ============================================
+           ناوی Roya لەناو مانگەکە
+           ============================================ */
+        .moon-name {
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            direction: ltr;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            font-weight: 600;
+            font-size: clamp(24px, 8vw, 40px);
+            letter-spacing: 0.15em;
+            padding-left: 0.15em; /* بۆ ئەوەی نووسینەکە ڕێک لە ناوەڕاست بێت */
+            color: #fff;
+            text-shadow: 0 0 10px #00f3ff, 0 0 24px #00f3ff;
+            pointer-events: none;
+        }
+
+        /* ============================================
+           نووسینەکان - قەبارە زیرەک
+           ============================================ */
+        .title {
+            font-size: clamp(20px, 5.5vw, 32px);
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 0 0 10px #00f3ff, 0 0 20px #00f3ff;
+            margin: 0;
+            letter-spacing: 1px;
+            line-height: 1.4;
+        }
+
+        .subtitle {
+            font-size: clamp(11px, 3vw, 15px);
+            color: #00f3ff;
+            margin-top: 10px;
+            text-shadow: 0 0 8px #00f3ff;
+            letter-spacing: 0.5px;
+        }
+
+        .hint {
+            margin-top: clamp(20px, 5vh, 35px);
+            font-size: clamp(10px, 2.5vw, 12px);
+            color: #64748b;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 1; }
+        }
+
+        /* ============================================
+           بۆ شاشەکانی گەورەتر (تابلێت و لاپتۆپ)
+           ============================================ */
+        @media (min-width: 768px) {
+            .moon {
+                width: 200px;
+                height: 200px;
+            }
+            .moon-name {
+                font-size: 40px;
+            }
+        }
+
+        /* ============================================
+           بۆ ئەو کەسانەی کە ئەنیمەیشن نەویستوون
+           (Accessibility)
+           ============================================ */
+        @media (prefers-reduced-motion: reduce) {
+            .moon::before,
+            .hint,
+            .container,
+            .star {
+                animation: none;
+            }
+        }
+
+        /* ============================================
+           دەرکەوتنی پەڕە بە نەرمی
+           ============================================ */
+        .fade-out {
+            animation: fadeOut 0.5s ease-out forwards;
+        }
+
+        @keyframes fadeOut {
+            to { opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ئەستێرەکان -->
+    <div class="stars" id="stars"></div>
+
+    <!-- کۆنتەینەری سەرەکی -->
+    <div class="container" onclick="openSystem()" id="container">
+        <div class="moon"><span class="moon-name">Roya</span></div>
+
+        <h1 class="title">کۆمپانیای قمر الفجر</h1>
+        <div class="subtitle">سیستەمی Roya بۆ مۆڵەتی کارمەندان</div>
+
+        <div class="hint">کلیک بکە بۆ چوونە ژوورەوە</div>
+    </div>
+
+    <script>
+        /* ==========================================
+           دروستکردنی ئەستێرەکان
+           ========================================== */
+        function createStars() {
+            const starsContainer = document.getElementById('stars');
+            const starCount = window.innerWidth < 768 ? 40 : 80; // لە مۆبایل کەمتر
+
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+
+                const size = Math.random() * 2 + 1; // قەبارە لە ١ بۆ ٣
+                star.style.width = size + 'px';
+                star.style.height = size + 'px';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.animationDelay = Math.random() * 3 + 's';
+                star.style.animationDuration = (Math.random() * 2 + 2) + 's';
+
+                starsContainer.appendChild(star);
+            }
+        }
+
+        /* ==========================================
+           چوونەژوورەوە بە ئەنیمەیشنی نەرم
+           ========================================== */
+        function openSystem() {
+            // دەرکەوتنی نەرم پێش گواستنەوە
+            document.body.classList.add('fade-out');
+
+            setTimeout(() => {
+                window.location.href = "login/login.html";
+            }, 400);
+        }
+
+        /* ==========================================
+           پاڵپشتی کیبۆرد (بۆ ئەکسێسبیلیتی)
+           ========================================== */
+        document.addEventListener('DOMContentLoaded', () => {
+            createStars();
+
+            const container = document.getElementById('container');
+
+            // پاڵپشتی Enter و Space
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    openSystem();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

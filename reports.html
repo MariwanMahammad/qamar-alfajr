@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="ku" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#030407">
+    <title>ڕاپۆرتی تەواو - Roya</title>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="reports.css">
+</head>
+<body>
+
+    <div class="stars" id="stars"></div>
+
+    <button class="menu-toggle" onclick="toggleSidebar()" aria-label="مێنیۆ">☰</button>
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <div class="layout">
+
+        <!-- سایدبار: بە sidebar.js دروست دەکرێت (لۆگۆ، ژێرپەڕەکانی ڕاپۆرت، ڕەنگ، زمان) -->
+        <aside class="sidebar" id="sidebar"></aside>
+
+        <main class="main-content">
+            <div class="container">
+
+                <div class="top-header">
+                    <div>
+                        <h1>ڕاپۆرتە گشتییەکان و ئامارەکانی مۆڵەت</h1>
+                        <p>لێرەدا دەتوانیت هەموو فلتەر و زانیارییە وردەکانی کارمەندەکان و مۆڵەتەکان ببینیت.</p>
+                    </div>
+                    <div style="font-size: 28px;">📊</div>
+                </div>
+
+                <!-- بەشی فلتەرکردنی پێشکەوتوو -->
+                <div class="form-card">
+                    <div class="form-title">🔍 فلتەرکردنی پێشکەوتووی ڕاپۆرتەکان</div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>لق</label>
+                            <select id="filterBranch" class="form-control">
+                                <option value="">هەموو لقەکان</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>ناوی کارمەند</label>
+                            <select id="filterEmployee" class="form-control">
+                                <option value="">هەموو کارمەندەکان</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>لە ڕێکەوتی</label>
+                            <input type="date" id="filterStartDate" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label>بۆ ڕێکەوتی</label>
+                            <input type="date" id="filterEndDate" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label>گرێبەستی کارمەند</label>
+                            <select id="filterContract" class="form-control">
+                                <option value="">هەموو گرێبەستەکان</option>
+                                <option value="active">✅ گرێبەستی چالاک</option>
+                                <option value="expired">⏳ گرێبەستی بەسەرچوو</option>
+                                <option value="no_contract">📄 بێ گرێبەست</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>جۆری مۆڵەت</label>
+                            <select id="filterCategory" class="form-control">
+                                <option value="">هەموو جۆرەکان</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>شێوازی مۆڵەت</label>
+                            <select id="filterType" class="form-control">
+                                <option value="">هەردووکی</option>
+                                <option value="ڕۆژانە">ڕۆژانە</option>
+                                <option value="کاتژمێری">کاتژمێری</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>دۆخی مۆڵەت</label>
+                            <select id="filterStatus" class="form-control">
+                                <option value="">هەموو دۆخەکان</option>
+                                <option value="پەسەندکراو">✅ پەسەندکراو</option>
+                                <option value="چاوەڕوانکراو">⏳ چاوەڕوانکراو</option>
+                                <option value="ڕەتکراوە">❌ ڕەتکراوە</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="btn-row">
+                        <button onclick="applyFilters()" class="btn btn-primary">🔍 گەڕان</button>
+                        <button onclick="resetFilters()" class="btn btn-warning">🧹 پاککردنەوەی فلتەر</button>
+                        <button onclick="exportToExcel()" class="btn btn-success">📊 Excel</button>
+                        <button onclick="exportToPDF()" class="btn btn-danger">📄 PDF</button>
+                    </div>
+                </div>
+
+                <!-- خشتەی وردەکارییەکان -->
+                <div class="form-card">
+                    <div class="form-title">📋 خشتەی وردەکارییەکانی مۆڵەتەکان</div>
+                    <div class="table-responsive">
+                        <table class="data-table" id="reports-table">
+                            <thead>
+                                <tr>
+                                    <th>ژمارە</th>
+                                    <th>ناوی کارمەند</th>
+                                    <th>ماوەی گرێبەست</th>
+                                    <th>هۆکار</th>
+                                    <th>لق</th>
+                                    <th>شێوازی مۆڵەت</th>
+                                    <th>ڕۆژانە</th>
+                                    <th>کاتژمێری</th>
+                                    <th>کۆی بەکارهاتوو</th>
+                                    <th>کۆی ماوە</th>
+                                    <th>تێبینی</th>
+                                    <th>ڕێکەوتی مۆڵەت</th>
+                                    <th>داواکاری مۆڵەت</th>
+                                    <th>دۆخ و وەڵامدانەوەی مۆڵەت</th>
+                                    <th>تێبینی وەڵامدانەوەی مۆڵەت</th>
+                                    <th>کردارەکان</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="16" class="empty-row">بۆ بینینی زانیارییەکان، تکایە دوگمەی "گەڕان" دابگرە</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- مۆداڵی دەستکاری (ناوی خانەکان وەک فلتەرەکانن: شێوازی مۆڵەت = ڕۆژانە/کاتژمێری، جۆری مۆڵەت = هۆکار) -->
+    <div class="modal" id="editModal">
+        <div class="modal-content">
+            <h3>✏️ دەستکاری مۆڵەت</h3>
+            <input type="hidden" id="editIndex">
+            <label>شێوازی مۆڵەت:</label>
+            <select id="editType">
+                <option value="ڕۆژانە">ڕۆژانە</option>
+                <option value="کاتژمێری">کاتژمێری</option>
+            </select>
+            <label>جۆری مۆڵەت:</label>
+            <select id="editCategory"></select>
+            <label>ماوە:</label>
+            <input type="text" id="editDuration">
+            <label>لە ڕێکەوتی:</label>
+            <input type="date" id="editStartDate">
+            <label>بۆ ڕێکەوتی:</label>
+            <input type="date" id="editEndDate">
+            <label>تێبینی:</label>
+            <textarea id="editNote" rows="3"></textarea>
+            <div class="modal-actions">
+                <button onclick="saveEditLeave()" class="btn btn-primary">💾 پاشەکەوتکردن</button>
+                <button onclick="closeEditModal()" class="btn btn-danger">✖️ داخستن</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- مۆداڵی گۆڕینی دۆخ -->
+    <div class="modal" id="statusModal">
+        <div class="modal-content">
+            <h3>🔄 گۆڕینی دۆخی مۆڵەت</h3>
+            <input type="hidden" id="statusEmpName">
+            <input type="hidden" id="statusSubmitDate">
+            <input type="hidden" id="statusStartDate">
+            <label>دۆخی نوێ:</label>
+            <select id="newStatus">
+                <option value="پەسەندکراو">✅ پەسەندکراو</option>
+                <option value="چاوەڕوانکراو">⏳ چاوەڕوانکراو</option>
+                <option value="ڕەتکراوە">❌ ڕەتکراوە</option>
+            </select>
+            <label>هۆکار / تێبینی:</label>
+            <textarea id="statusNote" rows="3" placeholder="بۆچی دۆخەکەت گۆڕی؟"></textarea>
+            <div class="modal-actions">
+                <button onclick="saveStatusChange()" class="btn btn-primary">💾 پاشەکەوتکردن</button>
+                <button onclick="closeStatusModal()" class="btn btn-danger">✖️ داخستن</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- مێنیوی سێ خاڵ -->
+    <div class="action-menu-overlay" id="actionMenuOverlay">
+        <button onclick="menuView()">👁️ وردەکاری</button>
+        <button onclick="menuRevert()">🔄 گەڕانەوە</button>
+        <button onclick="menuEdit()">✏️ دەستکاری</button>
+        <button onclick="menuDelete()">🗑️ سڕینەوە</button>
+        <button onclick="menuPrint()">🖨️ پرینت</button>
+    </div>
+
+    <script src="reports.js"></script>
+    <!-- چاکسازی و وەرگێڕان (دوای reports.js) -->
+    <script src="reports-fix.js"></script>
+    <!-- سایدبار + ڕەنگ + زمان: فایلەکە لە فۆڵدەری add-employee ە -->
+    <script src="../add-employee/sidebar.js"></script>
+</body>
+</html>

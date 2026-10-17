@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="ku" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#030407">
+    <title>ڕاپۆرتی مووچە - Roya</title>
+    <!-- شێوازی گشتی (سایدبار، کارت، دوگمە، مۆداڵ...) لە employee.css دێت -->
+    <link rel="stylesheet" href="../add-employee/employee.css">
+    <style>
+        /* پڕکردنەوەی شاشە: بۆشایی بەتاڵ نەمێنێت */
+        .main-content { padding: 25px clamp(15px, 2.5vw, 40px); }
+        .container { max-width: none; width: 100%; }
+
+        .period { margin: 0 0 14px; padding: 10px 16px; background: rgba(0, 243, 255, 0.06); border: 1px dashed rgba(0, 243, 255, 0.3); border-radius: 12px; font-size: 13px; color: #cbd5e1; }
+        .period b { color: #00f3ff; }
+        .sec { font-size: 15px; font-weight: bold; margin: 20px 0 10px; }
+        .sum-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; margin-bottom: 8px; }
+        .sum { background: rgba(11, 15, 25, 0.95); border: 1px solid rgba(0, 243, 255, 0.25); border-radius: 16px; padding: 14px 16px; text-align: center; }
+        .sum .sl { font-size: 12.5px; color: #94a3b8; line-height: 1.6; }
+        .sum .sv { font-size: 18px; font-weight: bold; color: #00f3ff; margin-top: 6px; direction: ltr; line-height: 1.5; }
+        .sum.total { border-width: 2px; }
+        .sum.total .sl { font-weight: bold; color: #e2e8f0; }
+        .sum.grand { grid-column: 1 / -1; }
+        .sum.grand .sv { font-size: 22px; }
+
+        /* ڕەنگی جیاواز بۆ هەر بەشێک: مووچە = سەوز، هەدیە = شین، سزا = سوور، کۆی گشتی = زێڕین */
+        .sec.c-sal { color: #34d399; } .sum.c-sal { border-color: rgba(16, 185, 129, 0.55); background: rgba(16, 185, 129, 0.08); } .sum.c-sal .sv { color: #34d399; }
+        .sec.c-bon { color: #38bdf8; } .sum.c-bon { border-color: rgba(56, 189, 248, 0.55); background: rgba(56, 189, 248, 0.08); } .sum.c-bon .sv { color: #38bdf8; }
+        .sec.c-pen { color: #f87171; } .sum.c-pen { border-color: rgba(239, 68, 68, 0.55); background: rgba(239, 68, 68, 0.08); } .sum.c-pen .sv { color: #f87171; }
+        .sec.c-grand { color: #fbbf24; } .sum.grand { border-color: rgba(251, 191, 36, 0.65); background: rgba(251, 191, 36, 0.10); } .sum.grand .sv { color: #fbbf24; }
+
+        .toolbar { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
+        .tw { overflow-x: auto; border: 1px solid rgba(0, 243, 255, 0.12); border-radius: 12px; }
+        .data-table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 1100px; }
+        .data-table th { background: #050811; color: #00f3ff; padding: 12px 8px; text-align: center; font-size: 12px; white-space: nowrap; border-bottom: 2px solid #1e293b; }
+        .data-table td { padding: 10px 8px; text-align: center; color: #cbd5e1; border-bottom: 1px solid #1e293b; vertical-align: middle; }
+        .data-table .nm { text-align: start; font-weight: bold; color: #fff; }
+        .data-table .sal, .data-table .pen, .data-table .bon, .data-table .net { font-weight: bold; direction: ltr; white-space: nowrap; line-height: 1.6; }
+        .data-table th.c-sal, .data-table td.sal { color: #34d399; background: rgba(16, 185, 129, 0.09); }
+        .data-table th.c-bon, .data-table td.bon { color: #38bdf8; background: rgba(56, 189, 248, 0.09); }
+        .data-table th.c-pen, .data-table td.pen { color: #f87171; background: rgba(239, 68, 68, 0.09); }
+        .data-table th.c-net, .data-table td.net { color: #fbbf24; background: rgba(251, 191, 36, 0.10); }
+        .data-table .dd { font-size: 10.5px; color: #94a3b8; font-weight: normal; }
+        .data-table .empty { padding: 30px; color: #64748b; }
+
+        .dots { background: #1e293b; color: #00f3ff; border: 1px solid rgba(0, 243, 255, 0.3); border-radius: 6px; padding: 4px 11px; font-size: 18px; font-weight: bold; cursor: pointer; line-height: 1; }
+        .dots:hover { background: #00f3ff; color: #000; }
+        .dm { display: none; position: fixed; z-index: 9999; min-width: 190px; background: #0b0f19; border: 1px solid #00f3ff; border-radius: 10px; overflow: hidden; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.7); }
+        .dm.show { display: block; }
+        .dm button { display: block; width: 100%; padding: 10px 14px; background: transparent; border: 0; border-bottom: 1px solid #1e293b; color: #fff; font-family: inherit; font-size: 13px; cursor: pointer; text-align: start; }
+        .dm button:last-child { border-bottom: 0; }
+        .dm button:hover { background: #1e293b; color: #00f3ff; }
+
+        .box-days { background: rgba(0, 243, 255, 0.04); border: 1px solid rgba(0, 243, 255, 0.15); border-radius: 10px; padding: 12px; margin-bottom: 16px; }
+        .hint { font-size: 11.5px; color: #94a3b8; margin-top: 6px; }
+        .hint.warn { color: #f87171; font-weight: bold; }
+        .adj-item { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 12px; padding: 7px 0; border-bottom: 1px dashed rgba(148, 163, 184, 0.2); }
+        .adj-item:last-child { border-bottom: 0; }
+        .adj-item button { background: none; border: 0; color: #fca5a5; cursor: pointer; }
+
+        /* ڕەنگی ڕووناک */
+        html[data-theme=light] .period { background: #f0f9ff; color: #475569; }
+        html[data-theme=light] .period b { color: #0369a1; }
+        html[data-theme=light] .sec.c-sal, html[data-theme=light] .sum.c-sal .sv { color: #047857 !important; }
+        html[data-theme=light] .sec.c-bon, html[data-theme=light] .sum.c-bon .sv { color: #0369a1 !important; }
+        html[data-theme=light] .sec.c-pen, html[data-theme=light] .sum.c-pen .sv { color: #b91c1c !important; }
+        html[data-theme=light] .sec.c-grand, html[data-theme=light] .sum.grand .sv { color: #b45309 !important; }
+        html[data-theme=light] .sum.c-sal { background: #ecfdf5; } html[data-theme=light] .sum.c-bon { background: #f0f9ff; }
+        html[data-theme=light] .sum.c-pen { background: #fef2f2; } html[data-theme=light] .sum.grand { background: #fffbeb; }
+        html[data-theme=light] .sum.total .sl { color: #0f172a; }
+        html[data-theme=light] .data-table .nm { color: #0f172a; }
+        html[data-theme=light] .data-table th.c-sal, html[data-theme=light] .data-table td.sal { color: #047857 !important; background: #ecfdf5 !important; }
+        html[data-theme=light] .data-table th.c-bon, html[data-theme=light] .data-table td.bon { color: #0369a1 !important; background: #f0f9ff !important; }
+        html[data-theme=light] .data-table th.c-pen, html[data-theme=light] .data-table td.pen { color: #b91c1c !important; background: #fef2f2 !important; }
+        html[data-theme=light] .data-table th.c-net, html[data-theme=light] .data-table td.net { color: #b45309 !important; background: #fffbeb !important; }
+        html[data-theme=light] .dots { background: #e0f2fe; color: #0369a1; border-color: #bae6fd; }
+        html[data-theme=light] .dm { background: #fff; border-color: #0ea5e9; }
+        html[data-theme=light] .dm button { color: #0f172a; border-color: #e2e8f0; }
+        html[data-theme=light] .dm button:hover { background: #e0f2fe; color: #0369a1; }
+        html[data-theme=light] .box-days { background: #f0f9ff; border-color: #bae6fd; }
+
+        .print-head { display: none; }
+
+        /* ===== پرینت: A4 بە باری پانی ===== */
+        @page { size: A4 landscape; margin: 8mm; @bottom-center { content: counter(page) " / " counter(pages); font-size: 9px; color: #555; direction: ltr; unicode-bidi: bidi-override; } }
+        @media print {
+            html, body, :root[data-theme] body, :root[data-theme] { background: #fff !important; color: #000 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }   /* ڕەنگی ڕووناکیش پشتەوەی سپی بێت */
+            .stars, .sidebar, .menu-toggle, .sidebar-overlay, .no-print, .sb-alert, #sbErrors, .modal-overlay, .dm, .page-header, .period, .message { display: none !important; }
+            .layout { display: block !important; }
+            .main-content { margin: 0 !important; padding: 0 !important; width: 100% !important; max-width: none !important; }
+            .container { max-width: none !important; width: 100% !important; padding: 0 !important; margin: 0 !important; }
+            .card, :root[data-theme] .card { background: #fff !important; border: 0 !important; box-shadow: none !important; padding: 0 !important; margin: 0 0 3mm !important; }
+            .card-title, :root[data-theme][data-theme] .card-title { color: #000 !important; text-shadow: none !important; font-size: 11px !important; margin: 3mm 0 2mm !important; padding: 0 !important; border: 0 !important; }
+            .card-title span:first-child { display: none; }
+
+            /* سەرەوە */
+            .print-head { display: block !important; margin: 0 0 3mm; border: 1.5px solid #000; border-radius: 4px; padding: 3mm 4mm; text-align: center; }
+            .ph-company { font-size: 18px; font-weight: bold; line-height: 1.4; }
+            .ph-title { font-size: 13px; margin: 1mm 0 3mm; color: #222; }
+            .ph-grid { display: grid; grid-template-columns: 1.3fr .7fr 1.1fr 2.5fr .9fr 1.4fr; border-top: 1px solid #000; }
+            .ph-grid > div { padding: 2mm 2mm 0; border-inline-start: 1px solid #999; }
+            .ph-grid > div:first-child { border-inline-start: 0; }
+            .ph-grid > div > span { display: block; font-size: 8.5px; color: #444; }
+            .ph-grid b { font-size: 11.5px; color: #000; white-space: nowrap; }
+            .ph-extra { margin-top: 2mm; padding-top: 1.5mm; border-top: 1px dashed #999; font-size: 9.5px; color: #222; }
+            .ph-extra:empty { display: none; }
+
+            /* کۆکراوەکان: هەر بەشێک ڕیزێک */
+            #summary > .sum-grid:first-child { display: none !important; }              /* ژمارەی کارمەندان لە سەرەوە هەیە */
+            #summary .sec { font-size: 10px !important; font-weight: bold; margin: 2.5mm 0 1mm !important; color: #000 !important; }
+            #summary .sum-grid { display: grid !important; grid-template-columns: repeat(auto-fill, minmax(42mm, 1fr)); gap: 2mm; margin: 0 !important; }
+            #summary .sum { background: #fff !important; border: 1px solid #777 !important; border-radius: 3px; padding: 1.5mm 1mm !important; box-shadow: none !important; break-inside: avoid; }
+            #summary .sum .sl { font-size: 8px !important; color: #333 !important; }
+            #summary .sum .sv { font-size: 11px !important; color: #000 !important; margin-top: 0.8mm !important; }
+            #summary .sum.total { border: 1.5px solid #000 !important; background: #ececec !important; }
+            #summary .sum.total .sl { color: #000 !important; font-weight: bold; }
+            #summary .sum.grand { grid-column: 1 / -1; }
+            #summary .sum.grand .sv { font-size: 13px !important; }
+
+            /* خشتە */
+            .tw { overflow: visible !important; border: 0 !important; }
+            #salTable { min-width: 0 !important; width: 100% !important; border-collapse: collapse; }
+            #salTable thead { display: table-header-group; }
+            #salTable tr { break-inside: avoid; page-break-inside: avoid; }
+            #salTable th { background: #e4e4e4 !important; color: #000 !important; border: 1px solid #777 !important; padding: 1.4mm 1mm !important; font-size: 8.5px !important; white-space: normal !important; }
+            #salTable td { background: transparent !important; color: #000 !important; border: 1px solid #999 !important; padding: 1mm !important; font-size: 9px !important; }
+            #salTable td.nm { text-align: start; font-weight: bold; }
+            #salTable td.net { background: #efefef !important; font-weight: bold; }
+            #salTable .dd { font-size: 7.5px !important; color: #444 !important; }
+            #salTable .tag { background: transparent !important; color: #000 !important; border: 1px solid #666; padding: 0 2mm !important; font-size: 8.5px !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="stars" id="stars"></div>
+
+    <button class="menu-toggle" onclick="toggleSidebar()" aria-label="مێنیۆ">☰</button>
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <div class="layout">
+        <!-- سایدبار: بە sidebar.js دروست دەکرێت -->
+        <aside class="sidebar" id="sidebar"></aside>
+
+        <main class="main-content">
+            <div class="container">
+
+                <!-- سەرەوەی پرینت: ناوی کۆمپانیا، لق، ساڵ، مانگ، ماوە، ژمارەی کارمەندان، کاتی پرینت (تەنها لە پرینتدا) -->
+                <div class="print-head">
+                    <div class="ph-company">کۆمپانیای قمر الفجر</div>
+                    <div class="ph-title">ڕاپۆرتی مووچە</div>
+                    <div class="ph-grid">
+                        <div><span>لق</span><b id="phBranch">—</b></div>
+                        <div><span>ساڵ</span><b id="phYear" dir="ltr">—</b></div>
+                        <div><span>مانگ</span><b id="phMonth">—</b></div>
+                        <div><span>ماوەی ڕاپۆرت</span><b id="phPeriod">—</b></div>
+                        <div><span>ژمارەی کارمەندان</span><b id="phCount" dir="ltr">—</b></div>
+                        <div><span>کاتی پرینت</span><b id="phTime" dir="ltr">—</b></div>
+                    </div>
+                    <div class="ph-extra" id="phExtra"></div>
+                </div>
+
+                <div class="page-header">
+                    <div class="page-title">
+                        <span>💰</span>
+                        <div>
+                            <div>ڕاپۆرتی مووچە</div>
+                            <small>لێرەدا دەتوانیت مووچە و هەدیە و سزای کارمەندان بەپێی مانگ ببینیت</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card no-print">
+                    <div class="card-title"><span>🔍</span> فلتەرکردن</div>
+                    <div class="form-grid">
+                        <div class="input-group"><label>ساڵ</label><select id="fYear" onchange="render()"></select></div>
+                        <div class="input-group"><label>مانگ</label><select id="fMonth" onchange="render()"></select></div>
+                        <div class="input-group"><label>لق</label><select id="fBranch" onchange="onFilter()"></select></div>
+                        <div class="input-group"><label>ڕۆڵ</label><select id="fRole" onchange="onFilter()"></select></div>
+                        <div class="input-group"><label>دۆخ</label><select id="fStatus" onchange="onFilter()"></select></div>
+                        <div class="input-group"><label>ناوی کارمەند</label><select id="fEmp" onchange="render()"></select></div>
+                    </div>
+                    <div class="toolbar">
+                        <button type="button" class="btn btn-primary" onclick="window.print()">🖨️ پرینت / PDF</button>
+                        <button type="button" class="btn btn-success" onclick="exportCsv()">📊 Excel</button>
+                    </div>
+                </div>
+
+                <div class="period"><span>ماوەی ڕاپۆرت:</span> <b dir="ltr" id="pStart"></b> <span>بۆ</span> <b dir="ltr" id="pEnd"></b></div>
+
+                <div id="summary"></div>
+
+                <div class="card">
+                    <div class="card-title"><span>📋</span> خشتەی مووچەکان <span id="count" style="margin-right:auto; color:#64748b; font-size:12px;"></span></div>
+                    <div class="tw">
+                        <table class="data-table" id="salTable">
+                            <thead>
+                                <tr>
+                                    <th>ژمارە</th><th>ناوی کارمەند</th><th>لق</th><th>ڕۆڵ</th><th>دۆخ</th>
+                                    <th>دەستپێکی گرێبەست</th><th>کۆتایی گرێبەست</th>
+                                    <th class="c-sal">مووچە</th><th class="c-pen">سزا</th><th class="c-bon">هەدیە</th><th class="c-net">کۆی گشتی مووچە ماوە</th>
+                                    <th class="no-print"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="tb"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- مێنیوی سێ خاڵ -->
+    <div class="dm no-print" id="dotsMenu">
+        <button type="button" onclick="openAdj(dotsEmp)">✏️ دەستکاری</button>
+        <button type="button" id="dmReset" onclick="resetDays(dotsEmp)">🔄 مانگی تەواو</button>
+    </div>
+
+    <!-- مۆداڵی دەستکاری: ڕۆژەکانی مووچە + هەدیە و سزا -->
+    <div class="modal-overlay" id="adjModal">
+        <div class="modal-content">
+            <div class="modal-header"><h2>✏️ دەستکاری — <span id="adjName"></span></h2><button class="modal-close" onclick="closeAdj()">✕</button></div>
+            <input type="hidden" id="adjEmp">
+
+            <div class="box-days">
+                <div class="old-contracts-title">📅 ڕۆژەکانی مووچە</div>
+                <div class="form-grid-modal">
+                    <div class="input-group">
+                        <label>ژمارەی ڕۆژەکان</label>
+                        <input type="number" id="adjDays" min="0" step="1" dir="ltr" oninput="clampDays()">
+                        <div class="hint" id="daysHint"></div>
+                    </div>
+                    <div class="input-group">
+                        <label>مووچەی ئەو ڕۆژانە</label>
+                        <div class="photo-label" id="daysPreview" style="text-align:start; direction:ltr; font-size:14px; color:#34d399;">—</div>
+                        <div class="hint">دینار بۆ نزیکترین ٢٥٠ دینار، دۆلار بۆ نزیکترین ١ دۆلار گرد دەکرێتەوە (بێ کەسر و سەنت)</div>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-primary" id="daysSave" onclick="saveDays()">💾 پاشەکەوتکردنی ڕۆژەکان</button>
+                    <button type="button" class="btn btn-secondary" id="daysFull" onclick="resetDays($('adjEmp').value)">🔄 مانگی تەواو</button>
+                </div>
+            </div>
+
+            <div class="old-contracts-title">🎁 هەدیە و سزا</div>
+            <div class="form-grid-modal">
+                <div class="input-group">
+                    <label>جۆر</label>
+                    <select id="adjKind"><option value="bonus">هەدیە</option><option value="penalty">سزا</option></select>
+                </div>
+                <div class="input-group">
+                    <label>بڕ</label>
+                    <input type="text" id="adjAmount" dir="ltr" inputmode="decimal" placeholder="100,000" oninput="formatMoneyInput(this)">
+                </div>
+                <div class="input-group">
+                    <label>دراو</label>
+                    <select id="adjCurrency"><option value="IQD">دینار</option><option value="USD">دۆلار</option></select>
+                </div>
+                <div class="input-group">
+                    <label>ڕێکەوت</label>
+                    <input type="date" id="adjDate">
+                </div>
+                <div class="input-group full-width">
+                    <label>تێبینی</label>
+                    <input type="text" id="adjNote">
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-primary" onclick="saveAdj()">➕ زیادکردن</button>
+                <button type="button" class="btn btn-secondary" onclick="closeAdj()">✖ داخستن</button>
+            </div>
+            <div class="old-contracts" style="margin-top:16px;">
+                <div class="old-contracts-title">تۆمارەکانی ئەم ماوەیە</div>
+                <div id="adjList"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="attendance-calc.js"></script>
+    <script>
+        const $ = id => document.getElementById(id);
+        const read = k => { try { return JSON.parse(localStorage.getItem(k)) || []; } catch (e) { return []; } };
+        const readMap = k => { try { return JSON.parse(localStorage.getItem(k)) || {}; } catch (e) { return {}; } };
+        const T = k => (window.royaTr ? window.royaTr(k) : k);
+        const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+        const pad = n => String(n).padStart(2, '0');
+        const dmy = s => s ? String(s).split('-').reverse().join('/') : '';      // 2026-10-01 => 01/10/2026
+
+        const ROLES = { 'employee': 'کارمەند', 'dept-manager': 'بەڕێوەبەری لق', 'general-manager': 'بەڕێوەبەری گشتی' };
+        const ROLE_ALL = Object.assign({ 'admin': 'بەڕێوەبەری سیستەم' }, ROLES);
+        const STATUS = { 'active': 'چالاک', 'inactive': 'ناچالاک', 'leave': 'لە مۆڵەتدا' };
+        const STATUS_CLASS = { 'active': 'tag-status-active', 'inactive': 'tag-status-inactive', 'leave': 'tag-status-leave' };
+        const MONTHS = ['کانوونی دووەم', 'شوبات', 'ئازار', 'نیسان', 'ئایار', 'حوزەیران', 'تەمموز', 'ئاب', 'ئەیلوول', 'تشرینی یەکەم', 'تشرینی دووەم', 'کانوونی یەکەم'];
+        const CUR = ['IQD', 'USD'];
+        let dotsEmp = null;
+
+        const nameOf = e => {
+            const l = localStorage.getItem('royaLang') || 'ku';
+            return (l === 'ar' && e.nameAr) || (l === 'en' && e.nameEn) || e.nameKu || e.name || '—';
+        };
+        const branchOf = e => e.branch === 'all' ? 'هەموو لقەکان' : ((read('branchesList').find(b => b.id === e.branch) || {}).name || '—');
+        const parseMoney = s => String(s || '').replace(/,/g, '').trim();
+
+        // کاتێک دەنووسیت، فاریزە لە نێوان هەزارەکان دادەنێت: 2,100,000
+        function formatMoneyInput(el) {
+            const before = el.value.slice(0, el.selectionStart).replace(/[^\d.]/g, '').length;
+            let raw = el.value.replace(/[^\d.]/g, '');
+            const dot = raw.indexOf('.');
+            if (dot !== -1) raw = raw.slice(0, dot + 1) + raw.slice(dot + 1).replace(/\./g, '').slice(0, 2);
+            const [i, d] = raw.split('.');
+            const out = i.replace(/\B(?=(\d{3})+(?!\d))/g, ',') + (d !== undefined ? '.' + d : '');
+            el.value = out;
+            let c = 0, p = 0;
+            while (p < out.length && c < before) { if (/[\d.]/.test(out[p])) c++; p++; }
+            el.setSelectionRange(p, p);
+        }
+
+        /* ---------- بڕە پارەییەکان بە دراوەکانیانەوە: { IQD, USD } ---------- */
+        const zero = () => ({ IQD: 0, USD: 0 });
+        const add = (a, b) => { CUR.forEach(c => a[c] += b[c] || 0); return a; };
+        const isZero = m => !Math.round(m.IQD) && !Math.round(m.USD);
+        const lines = m => CUR.filter(c => Math.round(m[c])).map(c => `${Math.round(m[c]).toLocaleString('en-US')} ${c === 'USD' ? 'دۆلار' : 'دینار'}`);
+        const fmt = m => isZero(m) ? '—' : lines(m).join('<br>');
+        const fmtBox = m => isZero(m) ? '0' : lines(m).join('<br>');
+
+        /* ---------- ماوەی ڕاپۆرت: ساڵ + مانگ (١ی مانگ تا کۆتایی مانگ) ---------- */
+        function period() {
+            const y = +$('fYear').value, m = +$('fMonth').value;       // m = 0 => هەموو ساڵ
+            const last = new Date(y, m || 12, 0).getDate();
+            return m ? { y, m, start: `${y}-${pad(m)}-01`, end: `${y}-${pad(m)}-${pad(last)}` }
+                     : { y, m: 0, start: `${y}-01-01`, end: `${y}-12-31` };
+        }
+
+        /*SAL-START*/
+        // زانیاری مووچەی کارمەند بۆ یەک مانگ.
+        // بنەڕەت: ئەگەر گرێبەستێک مانگەکەی گرتبێتەوە = مانگی تەواو؛ ئەگەر نا = ٠.
+        // ئەگەر خۆت ڕۆژەکانت دیاری کردبێت (overrides)، ئەوە بەکار دێت (زۆرتر لە ڕۆژەکانی مانگەکە نابێت).
+        function monthInfo(e, y, mo, overrides) {
+            const pd = n => String(n).padStart(2, '0');
+            const dim = new Date(y, mo, 0).getDate();
+            const cs = (e.contracts || []).filter(c => c && c.salary !== undefined && c.salary !== '' && c.salary !== null);
+            let best = null, bestDays = 0;
+            cs.forEach(c => {
+                let n = 0;
+                for (let d = 1; d <= dim; d++) {
+                    const ds = `${y}-${pd(mo)}-${pd(d)}`;
+                    if ((!c.start || c.start <= ds) && (!c.end || ds <= c.end)) n++;
+                }
+                if (n > 0 && n >= bestDays) { best = c; bestDays = n; }   // لە کاتی یەکسانیدا گرێبەستی نوێتر
+            });
+            const key = `${e.id}|${y}-${pd(mo)}`;
+            const custom = !!overrides && overrides[key] !== undefined;
+            const contract = best || (custom ? cs[cs.length - 1] : null) || null;
+            const days = custom ? Math.min(Math.max(Number(overrides[key]) || 0, 0), dim) : (best ? dim : 0);
+            return { dim, contract, days, custom, key };
+        }
+
+        // دیناری عێراقی کەسری نییە: بۆ نزیکترین ٢٥٠ دینار گرد دەکرێتەوە.
+        // ١٢٥.٥٦ => ٢٥٠ ، ١٢٥.٥٤ => ٠ (سنووری ڕووکردنەوە ١٢٥.٥٥ ە)
+        function roundIQD(x) {
+            const unit = 250, r = x % unit, base = x - r;
+            return r >= 125.55 ? base + unit : base;
+        }
+        // بڕی مووچەی ژمارەیەک ڕۆژ بێ کەسر: دینار بۆ نزیکترین ٢٥٠، دۆلار بۆ نزیکترین ١ دۆلار (٠.٥ و سەرووتر ← سەرەوە).
+        // مانگی تەواو = مووچەکە وەک خۆی (ئەگەر دینارەکە تەواو بێت)
+        function monthAmount(contract, days, dim) {
+            const s = Number(contract.salary), usd = contract.currency === 'USD';
+            if (days === dim) return usd ? Math.round(s) : (Number.isInteger(s) ? s : roundIQD(s));
+            const raw = s * days / dim;
+            return usd ? Math.round(raw) : roundIQD(raw);
+        }
+
+        // مانگێک کە «مووچە بەپێی پەنجەمۆر»ی بۆ چالاک کراوە (لە ڕاپۆرتی هاتن و چوون) بەپێی کاتژمێری کارکردن دەژمێردرێت؛ مانگەکانی تر وەک خۆیان
+        function salaryFor(e, p, overrides) {
+            const out = { IQD: 0, USD: 0 };
+            const months = p.m ? [p.m] : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+            months.forEach(mo => {
+                if (typeof RoyaAtt !== 'undefined' && RoyaAtt.isFingerprintPay(e.id, p.y, mo)) {
+                    const r = RoyaAtt.monthHoursPay(e, p.y, mo);
+                    if (r) out[r.currency] += r.amount;
+                    return;
+                }
+                const i = monthInfo(e, p.y, mo, overrides);
+                if (i.contract && i.days) out[i.contract.currency === 'USD' ? 'USD' : 'IQD'] += monthAmount(i.contract, i.days, i.dim);
+            });
+            return out;
+        }
+        // ئایا لە ماوەی ڕاپۆرتەکە هیچ مانگێک بەپێی پەنجەمۆرە؟
+        function anyFp(e, p) {
+            if (typeof RoyaAtt === 'undefined') return false;
+            return (p.m ? [p.m] : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]).some(mo => RoyaAtt.isFingerprintPay(e.id, p.y, mo));
+        }
+                /*SAL-END*/
+
+        const sumAdj = (list, e, kind, p) => {
+            const out = zero();
+            list.forEach(a => { if (a.empId === e.id && a.kind === kind && a.date >= p.start && a.date <= p.end) out[a.currency === 'USD' ? 'USD' : 'IQD'] += Number(a.amount) || 0; });
+            return out;
+        };
+
+        // ئەو گرێبەستەی لەگەڵ ماوەکە دەکەوێت (ئەگەر نەبوو، دوایین گرێبەست)
+        function contractFor(e, p) {
+            const cs = e.contracts || [];
+            const hit = [...cs].reverse().find(c => (!c.start || c.start <= p.end) && (!c.end || c.end >= p.start));
+            return hit || cs[cs.length - 1] || null;
+        }
+
+        /* ---------- فلتەرەکان ---------- */
+        function filteredEmployees() {
+            const b = $('fBranch').value, r = $('fRole').value, s = $('fStatus').value;
+            return read('employeesList').filter(e => (!b || e.branch === b || e.branch === 'all') && (!r || e.role === r) && (!s || e.status === s));
+        }
+
+        function fillMonths() {
+            const cur = $('fMonth').value;
+            $('fMonth').innerHTML = `<option value="0">${T('هەموو ساڵ')}</option>` + MONTHS.map((m, i) => `<option value="${i + 1}">${T(m)} (${i + 1})</option>`).join('');
+            $('fMonth').value = cur !== '' ? cur : String(new Date().getMonth() + 1);
+        }
+
+        function fillFilters() {
+            const y = new Date().getFullYear();
+            $('fYear').innerHTML = Array.from({ length: 7 }, (_, i) => y + 1 - i).map(v => `<option value="${v}">${v}</option>`).join('');
+            $('fYear').value = y;
+            fillMonths();
+            $('fBranch').innerHTML = '<option value="">-- هەموو لقەکان --</option>' + read('branchesList').map(b => `<option value="${esc(b.id)}">${esc(b.name)}</option>`).join('');
+            $('fRole').innerHTML = '<option value="">-- هەموو ڕۆڵەکان --</option>' + Object.entries(ROLES).map(([k, v]) => `<option value="${k}">${v}</option>`).join('');
+            $('fStatus').innerHTML = '<option value="">-- هەموو دۆخەکان --</option>' + Object.entries(STATUS).map(([k, v]) => `<option value="${k}">${v}</option>`).join('');
+            fillEmp();
+        }
+
+        function fillEmp() {
+            const cur = $('fEmp').value, list = filteredEmployees();
+            $('fEmp').innerHTML = '<option value="">-- هەموو کارمەندەکان --</option>' + list.map(e => `<option value="${esc(e.id)}">${esc(nameOf(e))}</option>`).join('');
+            $('fEmp').value = list.some(e => e.id === cur) ? cur : '';
+        }
+        function onFilter() { fillEmp(); render(); }
+
+        function getRows() {
+            const emp = $('fEmp').value, p = period(), ov = readMap('paySalaryDays'), adj = read('payAdjustments');
+            return filteredEmployees().filter(e => !emp || e.id === emp).map(e => {
+                const hours = anyFp(e, p);
+                const sal = salaryFor(e, p, ov), bon = sumAdj(adj, e, 'bonus', p), pen = sumAdj(adj, e, 'penalty', p);
+                const net = zero();
+                CUR.forEach(c => net[c] = sal[c] + bon[c] - pen[c]);
+                const info = (p.m && !hours) ? monthInfo(e, p.y, p.m, ov) : null;           // مانگی بەپێی پەنجەمۆر: ڕۆژەکان دەستکاری ناکرێن
+                return { e, sal, bon, pen, net, c: contractFor(e, p), info, hours };
+            });
+        }
+
+        /* ---------- پوختە: لقەکان بە جیا + کۆی گشتی (هەر بەشێک ڕەنگی جیاوازە) ---------- */
+        function renderSummary(rows) {
+            const b = $('fBranch').value;
+            const groups = read('branchesList').filter(x => !b || x.id === b).map(x => ({ id: x.id, name: x.name }));
+            if (rows.some(r => r.e.branch === 'all')) groups.push({ id: 'all', name: 'بەڕێوەبەری گشتی (هەموو لقەکان)' });
+            const agg = (id, key) => rows.filter(r => r.e.branch === id).reduce((m, r) => add(m, r[key]), zero());
+            const tot = key => rows.reduce((m, r) => add(m, r[key]), zero());
+            const box = (label, m, cls) => `<div class="sum ${cls}"><div class="sl">${label}</div><div class="sv">${fmtBox(m)}</div></div>`;
+            const sect = (title, key, cls, totalLabel) => `<div class="sec ${cls}">${title}</div><div class="sum-grid">`
+                + groups.map(g => box(esc(g.name), agg(g.id, key), cls)).join('') + box(totalLabel, tot(key), cls + ' total') + '</div>';
+
+            $('summary').innerHTML =
+                `<div class="sum-grid"><div class="sum"><div class="sl">ژمارەی کارمەندان</div><div class="sv">${rows.length}</div></div></div>`
+                + sect('💰 مووچەی لقەکان', 'sal', 'c-sal', 'کۆی مووچەی هەموو لقەکان')
+                + sect('🎁 هەدیەی لقەکان', 'bon', 'c-bon', 'کۆی هەدیەی هەموو لقەکان')
+                + sect('⚠️ سزای لقەکان', 'pen', 'c-pen', 'کۆی سزای هەموو لقەکان')
+                + `<div class="sec c-grand">🧾 کۆی گشتی</div><div class="sum-grid"><div class="sum total grand"><div class="sl">کۆی گشتی ماوەی مووچە و هەدیە و سزای هەموو لقەکان</div><div class="sv">${fmtBox(tot('net'))}</div></div></div>`;
+        }
+
+        // سەرەوەی پرینت: فلتەرە هەڵبژێردراوەکان
+        function fillPrintHead(p, n) {
+            const txt = id => { const s = $(id); return s && s.value ? s.options[s.selectedIndex].text.trim() : ''; };
+            $('phBranch').textContent = txt('fBranch') || T('هەموو لقەکان');
+            $('phYear').textContent = p.y;
+            $('phMonth').textContent = p.m ? `${T(MONTHS[p.m - 1])} (${p.m})` : T('هەموو ساڵ');
+            $('phPeriod').innerHTML = `<span dir="ltr">${dmy(p.start)}</span> <span>بۆ</span> <span dir="ltr">${dmy(p.end)}</span>`;
+            $('phCount').textContent = n;
+            const extra = [['ڕۆڵ', txt('fRole')], ['دۆخ', txt('fStatus')], ['ناوی کارمەند', txt('fEmp')]].filter(x => x[1]);
+            $('phExtra').innerHTML = extra.map(([k, v]) => `<span>${T(k)}:</span> <b>${esc(v)}</b>`).join(' &nbsp;·&nbsp; ');
+            updatePrintTime();
+        }
+        // کەی پرینت کراوە (کاتێک پرینت دەکرێت نوێ دەبێتەوە)
+        function updatePrintTime() {
+            const d = new Date();
+            $('phTime').textContent = `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+        }
+        window.addEventListener('beforeprint', updatePrintTime);
+
+        function render() {
+            const p = period(), rows = getRows();
+            $('pStart').textContent = dmy(p.start);
+            $('pEnd').textContent = dmy(p.end);
+            $('count').textContent = `(${rows.length})`;
+            fillPrintHead(p, rows.length);
+            renderSummary(rows);
+            $('tb').innerHTML = rows.length ? rows.map(({ e, sal, bon, pen, net, c, info, hours }, i) => `<tr>
+                <td>${i + 1}</td>
+                <td class="nm">${esc(nameOf(e))}</td>
+                <td>${esc(branchOf(e))}</td>
+                <td>${ROLE_ALL[e.role] || '—'}</td>
+                <td><span class="tag ${STATUS_CLASS[e.status] || ''}">${STATUS[e.status] || '—'}</span></td>
+                <td>${dmy(c && c.start) || '—'}</td>
+                <td>${dmy(c && c.end) || '—'}</td>
+                <td class="sal">${fmt(sal)}${hours ? '<div class="dd">بەپێی پەنجەمۆر</div>' : (info && info.custom ? `<div class="dd">(${info.days}/${info.dim} ڕۆژ)</div>` : '')}</td>
+                <td class="pen">${fmt(pen)}</td>
+                <td class="bon">${fmt(bon)}</td>
+                <td class="net">${fmt(net)}</td>
+                <td class="no-print"><button type="button" class="dots" onclick="showDots(event, '${esc(e.id)}')" aria-label="⋮">⋮</button></td></tr>`).join('')
+                : '<tr><td colspan="12" class="empty">هیچ داتایەک نییە</td></tr>';
+        }
+
+        /* ---------- مێنیوی سێ خاڵ ---------- */
+        function showDots(ev, id) {
+            ev.stopPropagation();
+            const m = $('dotsMenu'), btn = ev.currentTarget;
+            if (dotsEmp === id && m.classList.contains('show')) { m.classList.remove('show'); dotsEmp = null; return; }
+            dotsEmp = id;
+            const p = period(), e = read('employeesList').find(x => x.id === id);
+            $('dmReset').style.display = (p.m && e && readMap('paySalaryDays')[monthInfo(e, p.y, p.m, null).key] !== undefined) ? '' : 'none';
+            m.style.visibility = 'hidden';
+            m.classList.add('show');
+            const r = btn.getBoundingClientRect(), w = m.offsetWidth, h = m.offsetHeight;
+            let left = Math.min(Math.max(r.left, 8), window.innerWidth - w - 8);
+            let top = r.bottom + 4;
+            if (top + h > window.innerHeight - 8) top = Math.max(8, r.top - h - 4);
+            m.style.left = left + 'px'; m.style.top = top + 'px'; m.style.visibility = 'visible';
+        }
+        document.addEventListener('click', () => $('dotsMenu').classList.remove('show'));
+
+        /* ---------- دەستکاری: ڕۆژەکانی مووچە ---------- */
+        function curInfo() {
+            const p = period(), e = read('employeesList').find(x => x.id === $('adjEmp').value);
+            return (e && p.m) ? monthInfo(e, p.y, p.m, readMap('paySalaryDays')) : null;
+        }
+
+        function updatePreview() {
+            const i = curInfo(), box = $('daysPreview');
+            if (!i || !i.contract) { box.innerHTML = '—'; return; }
+            const n = Math.min(Math.max(Number($('adjDays').value) || 0, 0), i.dim), m = zero();
+            m[i.contract.currency === 'USD' ? 'USD' : 'IQD'] = monthAmount(i.contract, n, i.dim);
+            box.innerHTML = fmtBox(m);
+        }
+
+        function clampDays() {
+            const i = curInfo(), el = $('adjDays');
+            if (!i) return;
+            if (el.value !== '' && Number(el.value) > i.dim) { el.value = i.dim; $('daysHint').classList.add('warn'); }
+            else if (el.value !== '' && Number(el.value) < 0) { el.value = 0; }
+            else $('daysHint').classList.remove('warn');
+            updatePreview();
+        }
+
+        function saveDays() {
+            const i = curInfo(), v = $('adjDays').value;
+            if (!i) return;
+            if (v === '' || isNaN(v) || Number(v) < 0 || !Number.isInteger(Number(v))) { alert('تکایە ژمارەی ڕۆژێکی دروست بنووسە'); return; }
+            if (Number(v) > i.dim) { alert(`ئەم مانگە ${i.dim} ڕۆژە، ناتوانیت ${v} ڕۆژ دابنێیت`); return; }
+            const map = readMap('paySalaryDays');
+            map[i.key] = Number(v);
+            localStorage.setItem('paySalaryDays', JSON.stringify(map));
+            openAdj($('adjEmp').value, true); render();
+        }
+
+        function resetDays(id) {
+            const p = period(), e = read('employeesList').find(x => x.id === id);
+            if (!e || !p.m) return;
+            const map = readMap('paySalaryDays');
+            delete map[monthInfo(e, p.y, p.m, null).key];
+            localStorage.setItem('paySalaryDays', JSON.stringify(map));
+            if ($('adjModal').classList.contains('active')) openAdj(id, true);
+            render();
+        }
+
+        /* ---------- دەستکاری: هەدیە و سزا ---------- */
+        function openAdj(id, keepForm) {
+            const e = read('employeesList').find(x => x.id === id);
+            if (!e) return;
+            const p = period(), today = new Date().toISOString().slice(0, 10);
+            $('adjEmp').value = id;
+            $('adjName').textContent = nameOf(e);
+            if (!keepForm) {
+                $('adjDate').value = (today >= p.start && today <= p.end) ? today : p.start;
+                $('adjAmount').value = ''; $('adjNote').value = '';
+            }
+            const i = curInfo(), days = $('adjDays');
+            days.disabled = $('daysSave').disabled = $('daysFull').disabled = !i;
+            if (i) {
+                days.max = i.dim; days.value = i.days;
+                $('daysHint').textContent = `ئەم مانگە ${i.dim} ڕۆژە`;
+                $('daysHint').classList.remove('warn');
+            } else {
+                days.value = '';
+                $('daysHint').textContent = 'بۆ دیاریکردنی ڕۆژەکان، مانگێک هەڵبژێرە';
+            }
+            updatePreview();
+            // مانگێک کە مووچەکەی بەپێی پەنجەمۆرە: ڕۆژەکان دەستکاری ناکرێن
+            if (p.m && typeof RoyaAtt !== 'undefined' && RoyaAtt.isFingerprintPay(id, p.y, p.m)) {
+                days.disabled = $('daysSave').disabled = $('daysFull').disabled = true;
+                $('daysHint').textContent = 'مووچەی ئەم مانگە بەپێی پەنجەمۆرە (لە ڕاپۆرتی هاتن و چوون)';
+                $('daysHint').classList.remove('warn');
+                const hp = RoyaAtt.monthHoursPay(e, p.y, p.m), m = zero();
+                if (hp) m[hp.currency] = hp.amount;
+                $('daysPreview').innerHTML = hp ? fmtBox(m) : '—';
+            }
+            renderAdjList();
+            $('adjModal').classList.add('active');
+        }
+        function closeAdj() { $('adjModal').classList.remove('active'); }
+
+        function renderAdjList() {
+            const p = period(), id = $('adjEmp').value;
+            const list = read('payAdjustments').filter(a => a.empId === id && a.date >= p.start && a.date <= p.end).sort((a, z) => z.date.localeCompare(a.date));
+            $('adjList').innerHTML = list.length ? list.map(a => `<div class="adj-item">
+                <span><b dir="ltr">${dmy(a.date)}</b> · <span>${a.kind === 'bonus' ? '🎁 هەدیە' : '⚠️ سزا'}</span> · <b dir="ltr">${Math.round(Number(a.amount)).toLocaleString('en-US')}</b> <span>${a.currency === 'USD' ? 'دۆلار' : 'دینار'}</span>${a.note ? ' · ' + esc(a.note) : ''}</span>
+                <button type="button" onclick="delAdj('${esc(a.id)}')" title="سڕینەوە">🗑️</button></div>`).join('')
+                : '<div class="adj-item">هیچ تۆمارێک نییە</div>';
+        }
+
+        function saveAdj() {
+            const amount = parseMoney($('adjAmount').value), date = $('adjDate').value;
+            if (!amount || isNaN(amount) || Number(amount) <= 0) { alert('تکایە بڕێکی دروست بنووسە'); return; }
+            if (!date) { alert('تکایە ڕێکەوت دیاری بکە'); return; }
+            let amt = Number(amount);
+            if (!Number.isInteger(amt)) amt = $('adjCurrency').value === 'USD' ? Math.round(amt) : roundIQD(amt);   // بێ کەسر و سەنت
+            const list = read('payAdjustments');
+            list.push({ id: 'adj-' + Date.now(), empId: $('adjEmp').value, kind: $('adjKind').value, amount: amt, currency: $('adjCurrency').value, date, note: $('adjNote').value.trim() });
+            localStorage.setItem('payAdjustments', JSON.stringify(list));
+            $('adjAmount').value = ''; $('adjNote').value = '';
+            renderAdjList(); render();
+        }
+
+        function delAdj(id) {
+            if (!confirm('دڵنیایت لە سڕینەوەی ئەم تۆمارە؟')) return;
+            localStorage.setItem('payAdjustments', JSON.stringify(read('payAdjustments').filter(a => a.id !== id)));
+            renderAdjList(); render();
+        }
+
+        /* ---------- Excel: فایلی CSV (UTF-8) کە ڕاستەوخۆ لە Excel دەکرێتەوە ---------- */
+        function exportCsv() {
+            const head = ['ژمارە', 'ناوی کارمەند', 'لق', 'ڕۆڵ', 'دۆخ', 'دەستپێکی گرێبەست', 'کۆتایی گرێبەست', 'مووچە', 'سزا', 'هەدیە', 'کۆی گشتی مووچە ماوە'].map(T);
+            const plain = m => isZero(m) ? '0' : CUR.filter(c => Math.round(m[c])).map(c => `${Math.round(m[c])} ${c}`).join(' + ');
+            const body = getRows().map(({ e, sal, bon, pen, net, c }, i) => [i + 1, nameOf(e), T(branchOf(e)), T(ROLE_ALL[e.role] || ''), T(STATUS[e.status] || ''),
+                dmy(c && c.start), dmy(c && c.end), plain(sal), plain(pen), plain(bon), plain(net)]);
+            const csv = '\ufeff' + [head, ...body].map(r => r.map(v => `"${String(v == null ? '' : v).replace(/"/g, '""')}"`).join(',')).join('\r\n');
+            const p = period(), a = document.createElement('a');
+            a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+            a.download = `salary-${p.y}${p.m ? '-' + pad(p.m) : ''}.csv`;
+            a.click();
+        }
+
+        function toggleSidebar() { $('sidebar').classList.toggle('open'); $('sidebarOverlay').classList.toggle('active'); }
+
+        function createStars() {
+            const box = $('stars');
+            for (let i = 0; i < (window.innerWidth < 768 ? 40 : 80); i++) {
+                const s = document.createElement('div'), z = Math.random() * 2 + 1;
+                s.className = 'star';
+                s.style.cssText = `width:${z}px;height:${z}px;left:${Math.random() * 100}%;top:${Math.random() * 100}%;animation-delay:${Math.random() * 3}s;animation-duration:${Math.random() * 2 + 2}s`;
+                box.appendChild(s);
+            }
+        }
+
+        $('adjModal').addEventListener('click', e => { if (e.target === $('adjModal')) closeAdj(); });
+        fillFilters();
+        render();
+        createStars();
+        // کاتێک زمان دەگۆڕدرێت: ناوی مانگەکان و ناوی کارمەندەکان بە زمانی نوێ
+        window.addEventListener('royaLangChanged', () => { fillMonths(); fillEmp(); render(); });
+    </script>
+    <script src="../add-employee/sidebar.js"></script>
+</body>
+</html>

@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="ku" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <script>window.__errs = []; window.addEventListener('error', function (e) { window.__errs.push((e.filename || '').split('/').pop() + ':' + e.lineno + ' — ' + e.message); });</script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#030407">
+    <title>زیادکردن - Roya</title>
+    <link rel="stylesheet" href="employee.css">
+    <style>
+        /* پڕکردنەوەی شاشە: بۆشایی بەتاڵ نەمێنێت */
+        .main-content { padding: 25px clamp(15px, 2.5vw, 40px); }
+        .container { max-width: none; width: 100%; }
+        .branches-grid { grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); }
+        .employees-grid { grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)); }
+        .leave-types-grid { grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); }
+        .card { padding: clamp(20px, 3vw, 40px); }
+
+        /* فۆرمی کارمەند: دوو خانە + بەشەکان */
+        .form-section { grid-column: 1 / -1; font-size: 14px; font-weight: bold; color: #00f3ff; margin-top: 12px; padding: 10px 0 8px; border-bottom: 1px dashed rgba(0, 243, 255, 0.2); }
+        .form-section:first-child { margin-top: 0; }
+        @media (min-width: 640px) { #employee-form .form-grid .full-width { grid-column: 1 / -1; } }
+        .fp { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
+        .fp-list { display: flex; flex-wrap: wrap; gap: 6px; }
+        .fp-chip { display: inline-flex; align-items: center; gap: 6px; background: rgba(0, 243, 255, 0.08); border: 1px solid rgba(0, 243, 255, 0.25); border-radius: 18px; padding: 4px 10px; font-size: 11.5px; color: #cbd5e1; text-decoration: none; }
+        .fp-chip a { color: inherit; text-decoration: none; }
+        .fp-chip button { background: none; border: 0; color: #fca5a5; cursor: pointer; font-size: 12px; }
+        .doc-row { display: grid; grid-template-columns: 200px 1fr auto; gap: 12px; align-items: start; padding: 12px; background: #030407; border: 1px solid #1e293b; border-radius: 12px; margin-bottom: 10px; }
+        .doc-row select { padding: 11px 14px; background: #030407; border: 1px solid #1e293b; border-radius: 10px; color: #fff; font-family: inherit; font-size: 13px; }
+        @media (max-width: 640px) { .doc-row { grid-template-columns: 1fr; } }
+        .add-leave-type-form { flex-wrap: wrap; }
+        .add-leave-type-form select { flex: 1; min-width: 240px; padding: 13px 16px; background: #030407; border: 1px solid #1e293b; border-radius: 10px; color: #fff; font-family: inherit; font-size: 14px; outline: none; cursor: pointer; }
+        .add-leave-type-form select:focus { border-color: #00f3ff; }
+        .doc-add { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
+        .doc-add select, .doc-add input { padding: 11px 14px; background: #030407; border: 1px solid #1e293b; border-radius: 10px; color: #fff; font-family: inherit; font-size: 13px; }
+        .doc-add select { min-width: 220px; }
+        .doc-title { font-weight: bold; color: #00f3ff; font-size: 13px; padding-top: 8px; }
+        /* خانەی بەتاڵ یان هەڵە = سوور */
+        #employee-form .input-group.has-error label { color: #f87171 !important; }
+        #employee-form .input-group.has-error input, #employee-form .input-group.has-error select, #employee-form .input-group.has-error textarea { border-color: #ef4444 !important; background: rgba(239, 68, 68, 0.10) !important; box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.28) !important; }
+        .emp-sub { font-size: 11px; color: #94a3b8; margin-bottom: 6px; word-break: break-word; }
+        .det-t { font-weight: bold; color: #00f3ff; margin-top: 8px; }
+        .emp-info details summary { cursor: pointer; color: #00f3ff; margin-top: 8px; }
+
+        /* وێنە و شوێنی لق */
+        .branch-photo-upload { display: flex; align-items: center; gap: 14px; padding: 12px 16px; background: #030407; border: 2px dashed #1e293b; border-radius: 12px; cursor: pointer; transition: 0.3s; }
+        .branch-photo-upload:hover { border-color: #00f3ff; background: rgba(0, 243, 255, 0.03); }
+        .branch-photo-upload input[type="file"] { display: none; }
+        .branch-photo-upload .photo-label { text-align: start; }
+        .branch-photo-preview { width: 56px; height: 56px; border-radius: 12px; background: #0f1523; border: 2px solid #1e293b; display: flex; align-items: center; justify-content: center; overflow: hidden; font-size: 24px; flex-shrink: 0; }
+        .branch-photo-preview img, .branch-icon img { width: 100%; height: 100%; object-fit: cover; }
+        .branch-icon { overflow: hidden; width: 56px; height: 56px; }
+        .branch-loc { font-size: 11.5px; color: #94a3b8; margin-bottom: 4px; word-break: break-word; }
+    </style>
+</head>
+<body>
+
+    <div class="stars" id="stars"></div>
+
+    <button class="menu-toggle" onclick="toggleSidebar()" aria-label="مێنیۆ">☰</button>
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <div class="layout">
+
+        <!-- سایدبار: بە sidebar.js دروست دەکرێت (لۆگۆ، مێنیو، ژێرپەڕەکان، ڕەنگ، زمان) -->
+        <aside class="sidebar" id="sidebar"></aside>
+
+        <main class="main-content">
+            <div class="container">
+
+                <div class="page-header">
+                    <div class="page-title">
+                        <span id="pageIcon">➕</span>
+                        <div>
+                            <div id="pageTitle">زیادکردن</div>
+                            <small id="pageSub">یەکێک لە بەشەکان هەڵبژێرە</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- بەشەکان (لق / کارمەند / جۆرەکانی مۆڵەت) لە ڕێگەی سایدبارەوە دەگۆڕدرێن، تەنها یەکێکیان پیشان دەدرێت -->
+
+                <!-- تاب: لق -->
+                <div class="tab-content" id="tab-branch">
+                    <div class="card">
+                        <div class="card-title"><span>🏢</span> زیادکردنی لقی نوێ</div>
+                        <div class="message" id="branchMessage"></div>
+                        <form id="branch-form">
+                            <div class="form-grid">
+                                <div class="input-group full-width">
+                                    <label>ناوی لق (کۆمپانیا / نووسینگە) <span class="required">*</span></label>
+                                    <input type="text" id="branch-name" placeholder="بۆ نموونە: نووسینگەی قمر لیل" required>
+                                </div>
+                                <div class="input-group">
+                                    <label>وێنەی لق</label>
+                                    <div class="branch-photo-upload" onclick="document.getElementById('branch-photo').click()">
+                                        <div class="branch-photo-preview" id="branchPhotoPreview">🏢</div>
+                                        <div class="photo-label">کلیک بکە بۆ هەڵبژاردنی وێنە</div>
+                                        <input type="file" id="branch-photo" accept="image/*">
+                                    </div>
+                                </div>
+                                <div class="input-group">
+                                    <label>شوێنی لق</label>
+                                    <input type="text" id="branch-location" placeholder="بۆ نموونە: هەولێر، شەقامی ٦٠ مەتری">
+                                </div>
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary">💾 زیادکردنی لق</button>
+                                <button type="reset" class="btn btn-secondary">🔄 پاککردنەوە</button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="card">
+                        <div class="card-title"><span>📋</span> لیستی لقەکان <span id="branchCount" style="margin-right:auto; color:#64748b; font-size:12px;"></span></div>
+                        <div class="branches-grid" id="branchesList"></div>
+                    </div>
+                </div>
+
+                <!-- تاب: کارمەند (فۆرمەکە لە employees.js دروست دەکرێت) -->
+                <div class="tab-content" id="tab-employee">
+                    <div class="card">
+                        <div class="card-title"><span>👤</span> زیادکردنی کارمەندی نوێ</div>
+                        <div class="message" id="employeeMessage"></div>
+                        <form id="employee-form" novalidate></form>
+                    </div>
+                    <div class="card">
+                        <div class="card-title"><span>📋</span> لیستی کارمەندەکان <span id="empCount" style="margin-right:auto; color:#64748b; font-size:12px;"></span></div>
+                        <div class="employees-grid" id="employeesList"></div>
+                    </div>
+                </div>
+
+                <!-- تاب: کۆتایی گرێبەستەکان -->
+                <div class="tab-content" id="tab-contracts">
+                    <div class="card">
+                        <div class="card-title"><span>⏰</span> کۆتایی گرێبەستەکان <span id="ctCount" style="margin-right:auto; color:#64748b; font-size:12px;"></span></div>
+                        <div class="form-grid" style="margin-bottom:18px;">
+                            <div class="input-group"><label>لق</label><select id="ctBranch"></select></div>
+                            <div class="input-group"><label>ئاگادارکردنەوە</label><div class="photo-label" style="text-align:start; padding-top:12px;">کارمەندانی ٣٠ ڕۆژ یان کەمتریان ماوە بۆ کۆتایی گرێبەست</div></div>
+                        </div>
+                        <div class="employees-grid" id="ctList"></div>
+                    </div>
+                </div>
+
+                <!-- تاب: جۆرەکانی مۆڵەت -->
+                <div class="tab-content" id="tab-leavetype">
+                    <div class="card">
+                        <div class="card-title"><span>📋</span> زیادکردنی جۆری مۆڵەت (هۆکار)</div>
+                        <div class="message" id="leaveTypeMessage"></div>
+
+                        <div class="add-leave-type-form">
+                            <select id="leaveTypePick" onchange="onLeavePick()"></select>
+                            <input type="text" id="newLeaveTypeName" placeholder="ناوی جۆری نوێ بنووسە (بۆ نموونە: مۆڵەتی خوێندن)" style="display:none;">
+                            <button type="button" class="btn btn-primary" onclick="addNewLeaveType()">➕ زیادکردن</button>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-title"><span>📋</span> لیستی جۆرەکانی مۆڵەت <span id="leaveTypeCount" style="margin-right:auto; color:#64748b; font-size:12px;"></span></div>
+                        <div class="leave-types-grid" id="leaveTypesList"></div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal: دەستکاریکردنی لق -->
+    <div class="modal-overlay" id="editBranchModal">
+        <div class="modal-content">
+            <div class="modal-header"><h2>✏️ دەستکاریکردنی لق</h2><button class="modal-close" onclick="closeModal('editBranchModal')">✕</button></div>
+            <form id="edit-branch-form">
+                <input type="hidden" id="edit-branch-id">
+                <div class="input-group" style="margin-bottom:15px;">
+                    <label>ناوی لق <span class="required">*</span></label>
+                    <input type="text" id="edit-branch-name" required>
+                </div>
+                <div class="input-group" style="margin-bottom:15px;">
+                    <label>شوێنی لق</label>
+                    <input type="text" id="edit-branch-location" placeholder="بۆ نموونە: هەولێر، شەقامی ٦٠ مەتری">
+                </div>
+                <div class="input-group" style="margin-bottom:15px;">
+                    <label>وێنەی لق</label>
+                    <div class="branch-photo-upload" onclick="document.getElementById('edit-branch-photo').click()">
+                        <div class="branch-photo-preview" id="editBranchPhotoPreview">🏢</div>
+                        <div class="photo-label">کلیک بکە بۆ گۆڕینی وێنە</div>
+                        <input type="file" id="edit-branch-photo" accept="image/*">
+                    </div>
+                    <button type="button" class="btn btn-secondary btn-sm" style="margin-top:8px;" onclick="removeEditBranchPhoto()">🗑️ لابردنی وێنە</button>
+                </div>
+                <div class="switch-row">
+                    <span class="switch-label">دۆخی لق (چالاک / ناچالاک)</span>
+                    <div class="switch on" id="edit-branch-switch" onclick="toggleSwitch(this)"></div>
+                </div>
+                <div class="modal-actions">
+                    <button type="submit" class="btn btn-primary">💾 پاشەکەوتکردن</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('editBranchModal')">✖ داخستن</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: نوێکردنەوەی گرێبەست -->
+    <div class="modal-overlay" id="renewContractModal">
+        <div class="modal-content">
+            <div class="modal-header"><h2>📄 نوێکردنەوەی گرێبەست</h2><button class="modal-close" onclick="closeModal('renewContractModal')">✕</button></div>
+            <div id="contractEmployeeName" style="margin-bottom:15px; color:#fbbf24; font-weight:bold; text-align:center; font-size:15px;"></div>
+            <div class="old-contracts" id="oldContractsList"></div>
+            <form id="renew-contract-form">
+                <input type="hidden" id="renew-emp-id">
+                <div class="form-grid-modal">
+                    <div class="input-group"><label>دەستپێکی گرێبەستی نوێ <span class="required">*</span></label><input type="date" id="renew-start" required></div>
+                    <div class="input-group"><label>کۆتایی گرێبەستی نوێ <span class="required">*</span></label><input type="date" id="renew-end" required></div>
+                    <div class="input-group"><label>مووچەی نوێ <span class="required">*</span></label><input type="text" id="renew-salary" dir="ltr" inputmode="decimal" placeholder="2,100,000" oninput="formatMoneyInput(this)"></div>
+                    <div class="input-group"><label>دراو</label><select id="renew-currency"></select></div>
+                    <div class="input-group full-width"><label>وێنەی گرێبەستی نوێ (هەر چەند پەڕێک یان PDF)</label><div class="fp"><button type="button" class="btn btn-secondary btn-sm" onclick="fpAdd('renew')">📎 زیادکردنی وێنە یان PDF</button><div class="fp-list" id="fpl-renew"></div></div></div>
+                    <div class="input-group full-width"><label>تێبینی (ئارەزوومەندانە)</label><textarea id="renew-notes" placeholder="تێبینی لەبارەی گرێبەستە نوێیەکە..."></textarea></div>
+                </div>
+                <div class="modal-actions">
+                    <button type="submit" class="btn btn-success">✅ نوێکردنەوەی گرێبەست</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('renewContractModal')">✖ داخستن</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="employee.js"></script>
+    <!-- لق: وێنە، شوێن، دەستکاری، قفڵی سڕینەوە (دوای employee.js) -->
+    <script src="branches.js"></script>
+    <!-- کارمەند: فۆرم، هەویە، فایل، دەستکاری، نوێکردنەوە، کۆتایی گرێبەست (دوای branches.js) -->
+    <script src="employees.js"></script>
+    <!-- جۆرەکانی مۆڵەت (هەڵبژاردن لە لیست یان جۆری تر) -->
+    <script src="leavetypes.js"></script>
+    <!-- سایدبار + لۆگۆ + ڕەنگ + زمان: فایلەکە لەناو هەمان فۆڵدەری add-employee دابنێ -->
+    <script src="sidebar.js"></script>
+</body>
+</html>
