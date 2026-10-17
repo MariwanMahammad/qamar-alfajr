@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ku" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#030407">
+    <title>پەڕەی سەرەکی - کۆمپانیای قمر الفجر</title>
+    <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+
+    <div class="stars" id="stars"></div>
+
+    <button class="menu-toggle" onclick="toggleSidebar()" aria-label="مێنیۆ">☰</button>
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <div class="layout">
+
+        <aside class="sidebar" id="sidebar">
+            <!-- کلیک لەسەر ئەم بەشە سیستەمەکە نوێ دەکاتەوە -->
+            <div class="sidebar-header" onclick="softRefresh()" title="نوێکردنەوەی سیستەم">
+                <span>🌙</span> سیستەمی مۆڵەت
+            </div>
+
+            <li><a href="index.html" class="active">🏠 پەڕەی سەرەکی</a></li>
+                <span class="icon">🏠</span> پەڕەی سەرەکی
+            </a>
+            <li><a href="request-leave/request.html">📝 داواکردنی مۆڵەت</a></li>
+                <span class="icon">📝</span> داوایکردنی مۆڵەت
+            </a>
+              <li><a href="response-leave/response.html">✅ وەڵامدانەوەی مۆڵەت</a></li>
+                <span class="icon">✉️</span> وەڵامدانەوەی مۆڵەت
+            </a>
+            <li><a href="reports/reports.html">📊 ڕاپۆرتەکان</a></li>
+                <span class="icon">📊</span> ڕاپۆرتەکان
+            </a>
+            <li><a href="add-employee/employee.html">👤 زیادکردنی کارمەند</a></li>
+                <span class="icon">👤</span> زیادکردنی کارمەند
+            </a>
+             <li><a href="permissions/permissions.html">🔒 دەسەڵاتی کارمەند</a></li>
+                <span class="icon">🔒</span> دەسەڵاتەکانی کارمەند
+            </a>
+
+            <!-- دوگمەی چونە دەرەوە لە سایدبار -->
+            <a href="#" class="nav-item logout-nav" onclick="logout(event)">
+                <span class="icon">🚪</span> چونە دەرەوە
+            </a>
+        </aside>
+
+        <main class="main-content">
+            <div class="container">
+
+                <!-- Page Header -->
+                <div class="page-header">
+                    <div class="page-title">
+                        <span>🏠</span>
+                        <div>
+                            پەڕەی سەرەکی
+                            <small id="headerSubtitle">سیستەمی مۆڵەتی کارمەندەکان</small>
+                        </div>
+                    </div>
+
+                    <div class="header-right">
+                        <div class="branch-selector" id="branchSelector" style="display:none;">
+                            <label for="branchFilter">🏢 لق:</label>
+                            <select id="branchFilter" onchange="onBranchChange()">
+                                <option value="all">🌍 هەموو لقەکان</option>
+                            </select>
+                        </div>
+
+                        <!-- بەشی وێنە و ناوی بەکارهێنەر -->
+                        <div class="user-profile-wrapper">
+                            <div class="user-badge" id="userBadge" style="display:none;" onclick="toggleUserDropdown(event)">
+                                <img src="" alt="User Avatar" class="user-avatar" id="userAvatar">
+                                <span class="user-name" id="badgeName">—</span>
+                                <span class="dropdown-arrow">▼</span>
+                            </div>
+                            <div class="profile-dropdown" id="profileDropdown">
+                                <a href="#" class="dropdown-item" onclick="changePassword(event)">
+                                    <span>🔑</span> گۆرینی وشەی نهێنی
+                                </a>
+                                <a href="#" class="dropdown-item logout" onclick="logout(event)">
+                                    <span>🚪</span> چونە دەرەوە
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ١٢ خانەی مۆڵەت و دۆخەکان -->
+                <div class="cards-grid" id="cardsGrid"></div>
+
+                <!-- خشتەی گەورە -->
+                <div class="card">
+                    <div class="card-title">
+                        <span>📊</span>
+                        کورتە زانیاریی مۆڵەتی کارمەندان
+                        <span class="count" id="tableCount"></span>
+                        <span class="hint">💡 کلیک لەسەر هەر ڕیزێک بکە بۆ بینینی وردەکاری جۆرەکانی مۆڵەت</span>
+                    </div>
+
+                    <div class="table-wrap">
+                        <table class="main-table">
+                            <thead>
+                                <tr>
+                                    <th style="width:40px;"></th>
+                                    <th>👤 ناوی کارمەند</th>
+                                    <th>📄 کۆتایی گرێبەست</th>
+                                    <th>🏢 لق</th>
+                                    <th>📅 ساڵانە</th>
+                                    <th>📆 ڕۆژانە</th>
+                                    <th>⏰ کاتژمێری</th>
+                                    <th>✅ وەرگیراو</th>
+                                    <th>⏳ ماوە</th>
+                                    <th>⚠️ زیادە</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- مۆداڵی پیشاندانی کارمەندان -->
+    <div class="emp-modal" id="empModal" onclick="closeCardModal(event)">
+        <div class="emp-modal-content" onclick="event.stopPropagation()">
+            <div class="emp-modal-header">
+                <h3 id="empModalTitle">لیستی کارمەندان</h3>
+                <button class="emp-modal-close" onclick="closeCardModal()">&times;</button>
+            </div>
+            <div class="emp-modal-body" id="empModalBody"></div>
+        </div>
+    </div>
+
+    <script src="dashboard.js"></script>
+</body>
+</html>
